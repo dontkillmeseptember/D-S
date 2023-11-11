@@ -1,11 +1,11 @@
 [![Header](https://github.com/dontkillmeseptember/DSBot/blob/v1.0.0/assets/photo/header_ds.png?raw=true)](https://www.youtube.com/watch?v=mHVGpo74fZI&t)
 
 <div align="center">
-	<img src="https://img.shields.io/badge/-Python-757784?style=for-the-badge&logo=Python&logoColor=d6d6d6&" />
-	<img src="https://img.shields.io/badge/-JSON-757784?style=for-the-badge&logo=JSON&logoColor=d6d6d6&" />
-	<img src="https://img.shields.io/badge/-REDSLAV-757784?style=for-the-badge&logo=&logoColor=d6d6d6&" />
-	<img src="https://img.shields.io/badge/-Flask-757784?style=for-the-badge&logo=Flask&logoColor=d6d6d6&" />
-	<img src="https://img.shields.io/badge/-SQLite-757784?style=for-the-badge&logo=SQLite&logoColor=d6d6d6&" />
+	<img alt="Static Badge" src="https://img.shields.io/badge/-Python-757784?style=for-the-badge&logo=Python&logoColor=d6d6d6&" />
+	<img alt="Static Badge" src="https://img.shields.io/badge/-JSON-757784?style=for-the-badge&logo=JSON&logoColor=d6d6d6&" />
+	<img alt="Static Badge" src="https://img.shields.io/badge/-REDSLAV-757784?style=for-the-badge&logo=&logoColor=d6d6d6&" />
+	<img alt="Static Badge" src="https://img.shields.io/badge/-Flask-757784?style=for-the-badge&logo=Flask&logoColor=d6d6d6&" />
+	<img alt="Static Badge" src="https://img.shields.io/badge/-SQLite-757784?style=for-the-badge&logo=SQLite&logoColor=d6d6d6&" />
 	
 </div>
 
@@ -28,6 +28,10 @@
 <h2 align="center">
 	Социальные сети
 </h2>
+
+<div align="center">
+	<img src="https://img.shields.io/badge/-YouTube-757784?style=for-the-badge&logo=YouTube&logoColor=d6d6d6&link=https://www.youtube.com/channel/UCfIR8KClMlEUKm-xKMHZTVA" />
+</div>
 
 [![YouTube](https://img.shields.io/badge/-YouTube-757784?style=for-the-badge&logo=YouTube&logoColor=d6d6d6)](https://www.youtube.com/channel/UCfIR8KClMlEUKm-xKMHZTVA)
 [![VK](https://img.shields.io/badge/-VK-757784?style=for-the-badge&logo=VK&logoColor=d6d6d6)](https://vk.com/dontkillmeseptember)
