@@ -13,25 +13,45 @@
 	 Информация
 </h2>
 
+<div>
+	<a>
+		test
+	</a>
+</div>
+
 <h2 align="center">
 	 Планы на будущее
 </h2>
 
 <div>
-	<li>Not to die...</li>
+	<b>Обновление - v1.0.1</b>
+	<li>Создать регистрацию при входе в бота.</li>
+	<li>Создать базу данных для хранения пользователей.</li>
 </div>
 
 <h2 align="center">
-	 Установка
+	 Запуск
 </h2>
+
+<div>
+	<a>
+		В будущем будет добавлен запуск. <a href="https://www.youtube.com/watch?v=DhLLF6cAn-s">🕊️</a>
+	</a>
+</div>
+
+<h2 align="center">
+	 Деплой
+</h2>
+
+<div>
+	<a>
+		В будущем будет добавлен деплой. <a href="https://www.youtube.com/watch?v=DhLLF6cAn-s">🕊️</a>
+	</a>
+</div>
 
 <h2 align="center">
 	Социальные сети
 </h2>
-
-<div align="center">
-	<img src="https://img.shields.io/badge/-YouTube-757784?style=for-the-badge&logo=YouTube&logoColor=d6d6d6&link=https://www.youtube.com/channel/UCfIR8KClMlEUKm-xKMHZTVA" />
-</div>
 
 [![YouTube](https://img.shields.io/badge/-YouTube-757784?style=for-the-badge&logo=YouTube&logoColor=d6d6d6)](https://www.youtube.com/channel/UCfIR8KClMlEUKm-xKMHZTVA)
 [![VK](https://img.shields.io/badge/-VK-757784?style=for-the-badge&logo=VK&logoColor=d6d6d6)](https://vk.com/dontkillmeseptember)
