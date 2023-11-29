@@ -41,7 +41,7 @@ def Create_JSON_file() -> CreateJSON:
 		raise ValueError("VERSION_BOT не установлена в переменных окружения")
 
 """Функция вывода bot"""
-def bot() -> LoaderBot:
+def bot_class() -> LoaderBot:
 	try:
 		loader_bot_instance = LoaderBot().BOT
 
@@ -51,8 +51,9 @@ def bot() -> LoaderBot:
 
 """Функция вывода dp"""
 def dp_class() -> MyDispatcher:
-    my_dispatcher = MyDispatcher().DP
+	my_dispatcher = MyDispatcher().DP
 
-    return my_dispatcher
+	return my_dispatcher
 
+bot = bot_class()
 dp = dp_class()
