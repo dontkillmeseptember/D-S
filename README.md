@@ -5,7 +5,7 @@
 	<img alt="Json" src="https://img.shields.io/badge/-JSON-757784?style=for-the-badge&logo=JSON&logoColor=d6d6d6&" />
 	<img alt="REDSLAV" src="https://img.shields.io/badge/-REDSLAV-757784?style=for-the-badge&logo=&logoColor=d6d6d6&" />
 	<img alt="Flask" src="https://img.shields.io/badge/-Flask-757784?style=for-the-badge&logo=Flask&logoColor=d6d6d6&" />
-	<img alt="MongoDB" src="https://img.shields.io/badge/-MongoDB-757784?style=for-the-badge&logo=SQLite&logoColor=d6d6d6&" />
+	<img alt="MongoDB" src="https://img.shields.io/badge/-MongoDB-757784?style=for-the-badge&logo=MongoDB&logoColor=d6d6d6&" />
 	
 </div>
 
