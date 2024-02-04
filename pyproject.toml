@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "D & S bot"
+version = "1.0.5"
+description = "A small Telegram Bot wtitten in Python, using the aiogram 2.5 Library."
+authors = ["HahIWillWin <raykage1337@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/dontkillmeseptember/DSBot"
+repository = "https://github.com/dontkillmeseptember/DSBot"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+aiogram = "2.25.2"
+flask = "3.0.2"
+googletrans = "4.0.0rc1"
+python-dotenv = "1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
