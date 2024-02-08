@@ -1,4 +1,4 @@
-[![Header](https://github.com/dontkillmeseptember/DSBot/blob/v1.0.0/assets/photo/header_ds.png?raw=true)](https://www.youtube.com/watch?v=mHVGpo74fZI&t)
+[![Header](https://github.com/dontkillmeseptember/DSBot/blob/v1.0.5/assets/photo/header_dsbot.png?raw=true)](https://www.youtube.com/watch?v=mHVGpo74fZI&t)
 
 <div align="center">
 	<img alt="Python" src="https://img.shields.io/badge/-Python-757784?style=for-the-badge&logo=Python&logoColor=d6d6d6&" />
