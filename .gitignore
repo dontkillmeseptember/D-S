@@ -137,4 +137,4 @@ mongodb/
 
 *.bat
 
-message_logs.txt
+.vscode

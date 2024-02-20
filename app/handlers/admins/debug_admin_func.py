@@ -2,14 +2,13 @@ from data.loader import dp, bot
 from data.config import ConfigBot
 from data.config_Keyboard import ConfigVerifyUsers, ConfigRoleUsers, ConfigInlineKeyboard, ConfigReplyKeyboard
 from data.loader_keyboard import LoaderInlineKeyboardsAdmin, LoaderReplyKeyboards
-
-from data.version_db import get_bot_version
-from data.user_db import load_user_data, is_user_in_data, save_user_data
-from data.admin_db import load_admin_data, is_admin_in_data
-from data.market_db import load_market_data, save_market_data, is_market_in_data
-from data.rsb_db import load_rsb_data, save_rsb_data, is_rsb_in_data, check_rsb_data
-
 from data.states_groups import DebugAdminState
+
+from database.requests.version_db import get_bot_version
+from database.requests.user_db import load_user_data, is_user_in_data, save_user_data
+from database.requests.admin_db import load_admin_data, is_admin_in_data
+from database.requests.market_db import load_market_data, save_market_data, is_market_in_data
+from database.requests.rsb_db import load_rsb_data, save_rsb_data, is_rsb_in_data, check_rsb_data
 
 from misc.libraries import types, Union, FSMContext
 from misc.loggers import logger
@@ -141,9 +140,9 @@ async def rsb_admin_handler(callback_query: types.CallbackQuery, state: FSMConte
 
 				INFO_MENU_RSB_ADMIN_MESSAGE = f"💬 Добро пожаловать в управление <b>RSB - Банком</b>.\n\n" \
 										 	  f"Здесь вы можете легко управлять кошельками и добавлять их. Вот описание к кнопкам:\n\n" \
-										 	  f" • <b>{ConfigInlineKeyboard().ADD_RSB}:</b> Используйте эту кнопку для добавление <b>новых</b> кошельков в <b>RSB</b>.\n\n" \
-										 	  f" • <b>{ConfigInlineKeyboard().DELETE_RSB}:</b> При необходимости вы можете <b>удалить</b> выбранные кошельки из <b>RSB</b> с помощью этой кнопки.\n\n" \
-										 	  f" • <b>{ConfigInlineKeyboard().REDIT_RSB}:</b> Нажмите эту кнопку, чтобы <b>редактировать</b> кошельки, которые в данный момент находятся в <b>RSB</b>.\n\n" \
+										 	  f" • <b>{ConfigInlineKeyboard().ADD_RSB[2:]}:</b> Используйте эту кнопку для добавление <b>новых</b> кошельков в <b>RSB</b>.\n\n" \
+										 	  f" • <b>{ConfigInlineKeyboard().DELETE_RSB[:-2]}:</b> При необходимости вы можете <b>удалить</b> выбранные кошельки из <b>RSB</b> с помощью этой кнопки.\n\n" \
+										 	  f" • <b>{ConfigInlineKeyboard().REDIT_RSB[2:-2]}:</b> Нажмите эту кнопку, чтобы <b>редактировать</b> кошельки, которые в данный момент находятся в <b>RSB</b>.\n\n" \
 										 	  f"Спасибо за ваше внимание к деталям управления. Удачного управления."
 
 				if not CURRENT_STATE or CURRENT_STATE.startswith("DebugAdminState:"):
@@ -933,9 +932,9 @@ async def market_admin_handler(callback_query: types.CallbackQuery, state: FSMCo
 
 				menu_market_admin_message = f"💬 Добро пожаловать в управление корзиной товаров.\n\n" \
 											"Здесь вы можете легко управлять содержимым корзины. Вот описание к кнопкам:\n\n" \
-											f" • <b>{ConfigInlineKeyboard().ADD_MARKET}</b>: Используйте эту кнопку для добавления <b>новых</b> товаров в корзину.\n\n" \
-											f" • <b>{ConfigInlineKeyboard().DELETE_MARKET}</b>: При необходимости вы можете <b>удалить</b> выбранные товары из корзины с помощью этой кнопки.\n\n" \
-											f" • <b>{ConfigInlineKeyboard().CHECK_MARKET}</b>: Нажмите на эту кнопку, чтобы <b>просмотреть</b> полный список товаров, которые в данный момент находятся в корзине.\n\n" \
+											f" • <b>{ConfigInlineKeyboard().ADD_MARKET[2:]}</b>: Используйте эту кнопку для добавления <b>новых</b> товаров в корзину.\n\n" \
+											f" • <b>{ConfigInlineKeyboard().DELETE_MARKET[:-2]}</b>: При необходимости вы можете <b>удалить</b> выбранные товары из корзины с помощью этой кнопки.\n\n" \
+											f" • <b>{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}</b>: Нажмите на эту кнопку, чтобы <b>просмотреть</b> полный список товаров, которые в данный момент находятся в корзине.\n\n" \
 											"Спасибо за ваше внимание к деталям управления. Удачного управления."
 
 				if current_state == "DebugAdminState:AddMarketForAdminState" or current_state == "DebugAdminState:DeleteMarketForAdminState" or current_state == "DebugAdminState:CheckMarketForAdminState" or current_state == None:

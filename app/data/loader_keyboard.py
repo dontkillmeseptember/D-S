@@ -3,7 +3,9 @@ from misc.libraries import dataclass
 from keyboards.users.ReplyKeyboard.ReplyKeyboard_all import (
 	create_start_keyboard,
 	create_menu_keyboard,
-	create_world_menu_keyboard
+	create_world_menu_keyboard,
+	create_update_keyboard,
+	create_finish_update_keyboard
 )
 
 from keyboards.users.InlineKeyboard.InlineKeyboard_all import (
@@ -36,7 +38,9 @@ class LoaderReplyKeyboards:
 			message=None,
 			keyboards_start=None,
 			keyboards_menu=None,
-			keyboards_world_menu=None
+			keyboards_world_menu=None,
+			keyboards_update_bot=None,
+			keyboards_finish_update=None
 		):
 		
 		"""Выводим клавиатуру для обработчика /start"""
@@ -45,6 +49,10 @@ class LoaderReplyKeyboards:
 		self.KEYBOARDS_MENU = keyboards_menu or create_menu_keyboard(message)
 		"""Выводим клавиатуру для Мир Динары"""
 		self.KEYBOARDS_WORLD_MENU = keyboards_world_menu or create_world_menu_keyboard(message)
+		"""Выводим клавиатуру для обработчика /update"""
+		self.KEYBOARDS_UPDATE_BOT = keyboards_update_bot or create_update_keyboard()
+		"""Выводим клавиатуру для завершения обновления бота"""
+		self.KEYBOARDS_FINISH_UPDATE = keyboards_finish_update or create_finish_update_keyboard()
 		
 @dataclass
 class LoaderInlineKeyboards:

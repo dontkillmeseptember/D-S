@@ -1,6 +1,9 @@
 from handlers.users.start_bot_func import start_command
 from handlers.users.main_menu.user_profile.profile_func import profile_handler
 from handlers.users.main_menu.main_menu_func import main_menu_handler
+from handlers.users.main_menu.battlepass.run_battlepass_func import battlepass_handler
+from handlers.users.main_menu.update.update_func import update_command
+from handlers.users.main_menu.update.info_update_func import info_update_handler
 from handlers.users.main_menu.world_dinara.world_dinara_func import world_dinara_handler
 from handlers.users.main_menu.world_dinara.market_func import market_handler
 
@@ -23,6 +26,12 @@ class LoaderHandlers():
 	WORLD_DINARA_HANDLER: world_dinara_handler
 	"""Загружает обработчик для Корзины Товаров"""
 	MARKET_HANDLER: market_handler
+	"""Загружает обработчик для информации об обновление"""
+	INFO_UPDATE_HANDLER: info_update_handler
+	"""Загружает обработчик для обновления"""
+	UPDATE_HANDLER: update_command
+	"""Загружает обработчик для battlepass"""
+	BATTLEPASS_HANDLER: battlepass_handler
 
 @dataclass
 class LoaderAdminHandlers():

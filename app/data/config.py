@@ -8,15 +8,15 @@ from misc.libraries import (
 	requests,
 	random,
 	re,
-	Union
+	asyncio
 )
 
 from misc.loggers import logger
 
-from data.user_db import check_user_data
-from data.market_db import check_market_data
-from data.admin_db import load_admin_data, is_admin_in_data
-from data.rsb_db import check_rsb_data, is_rsb_in_data, load_rsb_data, save_rsb_data
+from database.requests.user_db import check_user_data
+from database.requests.market_db import check_market_data
+from database.requests.admin_db import load_admin_data, is_admin_in_data
+from database.requests.rsb_db import check_rsb_data, is_rsb_in_data, load_rsb_data
 
 load_dotenv()
 
@@ -33,8 +33,6 @@ class ConfigBot:
 			"""Вывод данные пользователя - Последние имя пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
 				return obj.from_user.first_name if obj.from_user.username else None
-			else:
-				logger.warning("⚠️ Произошел сбой с ISINSTANCE.")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 	
@@ -44,8 +42,6 @@ class ConfigBot:
 			"""Вывод данные пользователя - Ссылку на профиль пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
 				return obj.from_user.username if obj.from_user.username else None
-			else:
-				logger.warning("⚠️ Произошел сбой с ISINSTANCE.")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 	
@@ -55,8 +51,6 @@ class ConfigBot:
 			"""Выводим данные пользователя - USER_ID Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
 				return obj.from_user.id if obj.from_user.id else None
-			else:
-				logger.warning("⚠️ Произошел сбой с ISINSTANCE.")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -69,11 +63,7 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о BOT_ID пользователя"""
-				BOT_ID_USER = check_user_data_db.get("BOT_ID")
-
-				return BOT_ID_USER
-			else:
-				logger.warning("⚠️ Произошел сбой с ISINSTANCE.")
+				return check_user_data_db.get("BOT_ID")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 		
@@ -86,9 +76,7 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о NATION_USER пользователя"""
-				USER_NATION = check_user_data_db.get("NATION_USER")
-
-				return USER_NATION
+				return check_user_data_db.get("NATION_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -101,9 +89,7 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о USER_PASSWORD пользователя"""
-				USER_PASSWORD = check_user_data_db.get("USER_PASSWORD")
-
-				return USER_PASSWORD
+				return check_user_data_db.get("USER_PASSWORD")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -116,9 +102,7 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о USER_ROLE пользователя"""
-				USER_ROLE = check_user_data_db.get("USER_ROLE")
-
-				return USER_ROLE
+				return check_user_data_db.get("USER_ROLE")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -131,9 +115,7 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о NAME_USER_ROLE пользователя"""
-				USER_ROLE_NAME = check_user_data_db.get("NAME_USER_ROLE")
-
-				return USER_ROLE_NAME
+				return check_user_data_db.get("NAME_USER_ROLE")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -144,9 +126,7 @@ class ConfigBot:
 			"""Получаем доступ к базе данных о пользователе"""
 			check_user_data_db = check_user_data(obj)
 			"""Выводим информацию о USER_NAME пользователя"""
-			USER_BOT_NAME = check_user_data_db.get("USER_NAME")
-
-			return USER_BOT_NAME
+			return check_user_data_db.get("USER_NAME")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 			
@@ -157,14 +137,12 @@ class ConfigBot:
 			"""Получаем доступ к базе данных о пользователе"""
 			check_user_data_db = check_user_data(obj)
 			"""Выводим информацию о USER_LAST_NAME пользователя"""
-			USER_BOT_LAST_NAME = check_user_data_db.get("USER_LAST_NAME")
-
-			return USER_BOT_LAST_NAME
+			return check_user_data_db.get("USER_LAST_NAME")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERVERSIONBOT(cls, obj) -> float:
+	def USERVERSIONBOT(cls, obj) -> str:
 		try:
 			"""Выводим данных пользователя - VERSION_BOT Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
@@ -172,14 +150,12 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о VERSION_BOT пользователя"""
-				VERSION_BOT = check_user_data_db.get("VERSION_BOT")
-
-				return VERSION_BOT
+				return check_user_data_db.get("VERSION_BOT")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERSTATUSVERIFY(cls, obj) -> bool:
+	def USERSTATUSVERIFY(cls, obj) -> str:
 		try:
 			"""Выводим данных пользователя - STATUS_VERIFY_USER Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
@@ -187,14 +163,12 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о STATUS_VERIFY_USER пользователя"""
-				USER_STATUS_VERIFICATION = check_user_data_db.get("VERIFY_DATA", {}).get("STATUS_VERIFY_USER")
-
-				return USER_STATUS_VERIFICATION
+				return check_user_data_db.get("VERIFY_DATA", {}).get("STATUS_VERIFY_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERVERIFY(cls, obj) -> Union[bool, None]:
+	def USERVERIFY(cls, obj) -> str:
 		try:
 			"""Выводим данных пользователя - VERIFY_USER Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
@@ -202,14 +176,12 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о VERIFY_USER пользователя"""
-				USER_VERIFICATION = check_user_data_db.get("VERIFY_DATA", {}).get("VERIFY_USER")
-
-				return USER_VERIFICATION
+				return check_user_data_db.get("VERIFY_DATA", {}).get("VERIFY_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERVERIFYCODE(cls, obj) -> int:
+	def USERVERIFYCODE(cls, obj) -> str:
 		try:
 			"""Выводим данных пользователя - VERIFY_CODE_USER Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
@@ -217,14 +189,12 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о VERIFY_CODE_USER пользователя"""
-				BOT_VERIFICATION_CODE = check_user_data_db.get("VERIFY_DATA", {}).get("VERIFY_CODE_USER")
-
-				return BOT_VERIFICATION_CODE
+				return check_user_data_db.get("VERIFY_DATA", {}).get("VERIFY_CODE_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERCONSIDERATIONVERIFY(cls, obj) -> True:
+	def USERCONSIDERATIONVERIFY(cls, obj) -> str:
 		try:
 			"""Выводим данных пользователя - CONSIDERATION_VERIFY_USER Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
@@ -232,14 +202,12 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о CONSIDERATION_VERIFY_USER пользователя"""
-				USER_CONSIDERATION_VERIFICATION = check_user_data_db.get("VERIFY_DATA", {}).get("CONSIDERATION_VERIFY_USER")
-
-				return USER_CONSIDERATION_VERIFICATION
+				return check_user_data_db.get("VERIFY_DATA", {}).get("CONSIDERATION_VERIFY_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERREGISTORWALLET(cls, obj) -> True:
+	def USERREGISTORWALLET(cls, obj) -> str:
 		try:
 			"""Выводим данных пользователя - REGISTOR_WALLET_USER Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
@@ -247,38 +215,31 @@ class ConfigBot:
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о REGISTOR_WALLET_USER пользователя"""
-				USER_REGISTOR_WALLET = check_user_data_db.get("RSB_DATA", {}).get("REGISTOR_WALLET_USER")
-
-				return USER_REGISTOR_WALLET
+				return check_user_data_db.get("RSB_DATA", {}).get("REGISTOR_WALLET_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERMESSAGE(cls, message) -> float:
+	def USERMESSAGE(cls, message) -> str:
 		"""Вводим сообщение пользователя для регистрации пароля и т.д."""
 		return message.text
 
 	@classmethod
-	def GETBOTID(cls) -> random:
-		"""Генерация случайного 9-значного BOT_ID"""
-		BOT_ID = ''.join(str(random.randint(0, 9)) for _ in range(9))
-		
-		return BOT_ID
+	def GETBOTID(cls) -> str:
+		"""Генерация случайного 9-значного BOT_ID"""		
+		return ''.join(str(random.randint(0, 9)) for _ in range(9))
 
 	@classmethod
-	def GETVERIFYCODE(cls) -> random:
+	def GETVERIFYCODE(cls) -> str:
 		"""Генерируем четырехзначный код для верификации аккаунта"""
-		VERIFY_CODE = ''.join(str(random.randint(0, 9)) for _ in range(4))
-
-		return VERIFY_CODE
+		return ''.join(str(random.randint(0, 9)) for _ in range(4))
 
 	@classmethod
 	def GETLENUSERS(cls, obj) -> int:
 		"""Выводим определенное количество чего-то"""
 		try:
 			"""Получаем количество зарегистрированных пользователей"""
-			if isinstance(obj, (list, dict)):
-				return len(obj)
+			return len(obj) if isinstance(obj, (list, dict)) else 0
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -286,14 +247,12 @@ class ConfigBot:
 	def GETCOUNTVERIFITEDUSERS(cls, user_data) -> int:
 		"""Выводим количество верифицированных пользователей"""
 		try:
-			verified_users = [user for user in user_data.values() if user.get("VERIFY_DATA", {}).get("VERIFY_USER", False)]
-
-			return len(verified_users)
+			return sum(1 for user in user_data.values() if user.get("VERIFY_DATA", {}).get("VERIFY_USER", False))
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def GETCONSIDERATIONVERIFY(cls, user_data) -> Union[int, str]:
+	def GETCONSIDERATIONVERIFY(cls, user_data) -> str:
 		"""Выводим информацию о пользователей которые имеют ключ "CONSIDERATION_VERIFY_USER": true"""
 		try:
 			user_info_list = []
@@ -316,16 +275,16 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def GETRSB(cls, rsb_data, obj, users_or_admin, types) -> Union[str, int, float, None]:
+	def GETRSB(cls, rsb_data, obj, users_or_admin, types) -> str:
 		"""Выводим информацию о кошельке из базы данных"""
 		try:
 			if not users_or_admin:
 				"""Объявляем переменные для доступа к базе данных пользователей и получение информации"""
 				USER_ID = ConfigBot.USERID(types)
-
 				RSB_DATA_DB = load_rsb_data()
-				check_user_data_db = check_user_data(USER_ID)
+
 				"""Выводим информацию о NUMBER_WALLET_USER пользователя"""
+				check_user_data_db = check_user_data(USER_ID)
 				USER_NUMBER_WALLET = check_user_data_db.get("RSB_DATA", {}).get("NUMBER_WALLET_USER")
 
 				if is_rsb_in_data(USER_NUMBER_WALLET, RSB_DATA_DB):
@@ -340,33 +299,18 @@ class ConfigBot:
 					elif obj in ("INTEREST_USER_ONE", "INTEREST_USER_TWO"):
 						return check_rsb_data_db.get("INTEREST", {}).get(obj)
 					
-					elif obj == "ALL_SUM_ETH":
-						ALL_SUM_ETH_END = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_ETH_END")
+					elif obj in ("ALL_SUM_ETH", "ALL_SUM_USD", "ALL_SUM_RUB"):
+						AMOUNT_TYPE = obj.split("_")[-1]
+						AMOUNT = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get(f"ALL_SUM_{AMOUNT_TYPE}_END")
 
-						if ALL_SUM_ETH_END > 0:
-							return ALL_SUM_ETH_END
-						elif ALL_SUM_ETH_END == 0:
-							ALL_SUM_ETH_START = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_ETH_START")
+						if AMOUNT > 0:
+							return AMOUNT
+						
+						elif AMOUNT == 0:
+							START_AMOUNT = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get(f"ALL_SUM_{AMOUNT_TYPE}_START")
 
-							return ALL_SUM_ETH_START
-					elif obj == "ALL_SUM_USD":
-						ALL_SUM_USD_END = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_USD_END")
+							return START_AMOUNT
 
-						if ALL_SUM_USD_END > 0:
-							return ALL_SUM_USD_END
-						elif ALL_SUM_USD_END == 0:
-							ALL_SUM_USD_START = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_USD_START")
-
-							return ALL_SUM_USD_START
-					elif obj == "ALL_SUM_RUB":
-						ALL_SUM_RUB_END = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_RUB_END")
-
-						if ALL_SUM_RUB_END > 0:
-							return ALL_SUM_RUB_END
-						elif ALL_SUM_RUB_END == 0:
-							ALL_SUM_RUB_START = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_RUB_START")
-
-							return ALL_SUM_RUB_START
 					else:
 						return check_rsb_data_db.get(obj, None)
 				
@@ -381,33 +325,17 @@ class ConfigBot:
 				elif obj in ("INTEREST_USER_ONE", "INTEREST_USER_TWO"):
 					return check_rsb_data_db.get("INTEREST", {}).get(obj)
 
-				elif obj == "ALL_SUM_ETH":
-					ALL_SUM_ETH_END = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_ETH_END")
+				elif obj in ("ALL_SUM_ETH", "ALL_SUM_USD", "ALL_SUM_RUB"):
+					AMOUNT_TYPE = obj.split("_")[-1]
+					AMOUNT = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get(f"ALL_SUM_{AMOUNT_TYPE}_END")
 
-					if ALL_SUM_ETH_END > 0:
-						return ALL_SUM_ETH_END
-					elif ALL_SUM_ETH_END == 0:
-						ALL_SUM_ETH_START = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_ETH_START")
+					if AMOUNT > 0:
+						return AMOUNT
+					
+					elif AMOUNT == 0:
+						START_AMOUNT = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get(f"ALL_SUM_{AMOUNT_TYPE}_START")
 
-						return ALL_SUM_ETH_START
-				elif obj == "ALL_SUM_USD":
-					ALL_SUM_USD_END = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_USD_END")
-
-					if ALL_SUM_USD_END > 0:
-						return ALL_SUM_USD_END
-					elif ALL_SUM_USD_END == 0:
-						ALL_SUM_USD_START = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_USD_START")
-
-						return ALL_SUM_USD_START
-				elif obj == "ALL_SUM_RUB":
-					ALL_SUM_RUB_END = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_RUB_END")
-
-					if ALL_SUM_RUB_END > 0:
-						return ALL_SUM_RUB_END
-					elif ALL_SUM_RUB_END == 0:
-						ALL_SUM_RUB_START = check_rsb_data_db.get("ALL_SUM_WALLET", {}).get("ALL_SUM_RUB_START")
-						
-						return ALL_SUM_RUB_START
+						return START_AMOUNT
 				else:
 					return check_rsb_data_db.get(obj, None)
 
@@ -416,23 +344,16 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def GETNUMBERWALLETRSB(cls, rsb_data, user_id) -> int:
+	def GETNUMBERWALLETRSB(cls, rsb_data, user_id) -> str:
 		"""Выводим ID кошельков из базы данных RSB"""
 		try:
-			number_wallet_info_list = []
-
 			"""Проверяем зарегистрирован пользователь в базе админов"""
 			ADMIN_DATA_DB = load_admin_data()
 
 			if is_admin_in_data(user_id, ADMIN_DATA_DB):
-				for wallet_number, rsb_info in rsb_data.items():
-					"""Выводим краткую информацию о ID кошельков"""
-					ETH = rsb_info["ETH"]
-
-					"""Добавление ID кошельков в список"""
-					number_wallet_info_list.append(f" • <code>{wallet_number}</code> ~ <b>{ETH} ETH</b>")
-
-			if number_wallet_info_list:
+				"""Выводим краткую информацию о ID кошельков"""
+				number_wallet_info_list = [f" • <code>{wallet_number}</code> ~ <b>{rsb_info['ETH']} ETH</b>" for wallet_number, rsb_info in rsb_data.items()]
+					
 				return "\n".join(number_wallet_info_list)
 			else:
 				return " • В данный момент нету ID кошельков."
@@ -452,7 +373,7 @@ class ConfigBot:
 				return data.get("rates", {}).get("RUB")
 			else:
 				return -1
-		except Exception as e:
+		except requests.exceptions.RequestException as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
@@ -507,61 +428,48 @@ class ConfigBot:
 	def GETMARKET(cls, market_data, obj) -> bool:
 		"""Выводим данные товаров из базы данных"""
 		try:
-			"""Объявляем переменную с выводом информации о товаре из корзины"""
-			check_market_data_db = check_market_data(market_data)
-
-			if obj in ("URL_PHOTO", "URL_SITE", "NAME_MARKET", "MESSAGE"):
-				return check_market_data_db.get(obj, None)
-			else:
-				return None
+			return check_market_data(market_data).get(obj, None) if obj in ("URL_PHOTO", "URL_SITE", "NAME_MARKET", "MESSAGE") else None
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
 	def GETPRICE(cls, art):
-		"""Получение цены товара исходя из его ссылки на базу данных сайта"""
+		"""Выводим цену из базы данных"""
 		try:
-			"""Вводим из message артикул пользователя и проверяем его"""
+			"""Объявляем переменную с выводом информации о цене"""
 			check_market_data_db = check_market_data(art)
 
-			"""Получаем ссылку на товар из базы данных маркета"""
+			"""Объявляем переменную с выводом ссылки на сайт магазина"""
 			URL_SITE = check_market_data_db.get("URL_SITE")
 
-			if ConfigBot.CHECKWILDBERRIESLINK(URL_SITE) == True:
-				"""Ссылка на базу данных JSON файл от WB, где мы берем цену товара"""
-				url = f"https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=123585924&spp=27&nm={art}"
+			if ConfigBot.CHECKWILDBERRIESLINK(URL_SITE):
+				"""Ссылка на базу данных JSON файл от Wildberries, где мы берем цену товара"""
+				URL = f"https://card.wb.ru/cards/v1/detail?appType=1&curr=rub&dest=123585924&spp=27&nm={art}"
 
 				"""Выполнение запроса по ссылке"""
-				response = requests.get(url)
+				response = requests.get(URL)
 
-				"""Проверка статуса ответа"""
 				if response.status_code == 200:
 					json_data = response.json()
+					products = json_data["data"]["products"]
 					
-					if "data" in json_data and "products" in json_data["data"]:
-						products = json_data["data"]["products"]
-						
-						for product in products:
-							if "salePriceU" in product:
-								sale_price = product["salePriceU"]
-								sale_price = str(sale_price)
-								sale_price = sale_price.rstrip("00")
-								sale_price = int(sale_price)
-								
-								return sale_price
-					else:
-						return None
+					for product in products:
+						if "salePriceU" in product:
+							SALE_PRICE = int(str(product["salePriceU"]).rstrip("00"))
+
+							return SALE_PRICE
+					
+					return None
 				else:
 					logger.critical("⚠️ Отказ доступа к информации о товаре.")
 				
-			elif ConfigBot.CHECKLAMODALINK(URL_SITE) == True:
+			elif ConfigBot.CHECKLAMODALINK(URL_SITE):
 				"""Ссылка на базу данных JSON файл от Lamoda, где мы берем цену товара"""
-				url = f"https://www.lamoda.ru/api/v1/product/get?sku={art}&city_aoid=6100000500000&is_hybrid_supported=true&size_id=0"
+				URL = f"https://www.lamoda.ru/api/v1/product/get?sku={art}&city_aoid=6100000500000&is_hybrid_supported=true&size_id=0"
 
 				"""Выполнение запроса по ссылке"""
-				response = requests.get(url)
+				response = requests.get(URL)
 
-				"""Проверка статуса ответа"""
 				if response.status_code == 200:
 					json_data = response.json()
 					
@@ -594,8 +502,6 @@ class ConfigBot:
 			return bool(lamoda_link_pattern.match(link))
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
-
-			return None
 
 	@classmethod
 	def CHECKWILDBERRIESLINK(cls, link) -> bool:
@@ -718,3 +624,50 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 		
 		return None
+
+@dataclass
+class ConfigBotAsync:
+	@classmethod
+	async def UPDATEPROGRESS(cls, msg = None, update_stage = None, time_sleep = None, version = None, type = None) -> None:
+		"""Асинхронная функция для обновления прогресса с текстом сообщения и этапом обновления в качестве параметров.
+		
+		Args:
+		- msg (Optional[str]): Текст сообщения для обновления.
+		- update_stage (Optional[int]): Этап процесса обновления.
+		- time_sleep (Optional[int]): Время ожидания во время процесса обновления.
+		- version (Optional[str]): Версия обновления.
+		- type (Optional[object]): Тип отправки сообщения.
+		"""
+		try:
+			loading_symbols = ["⠋", "⠙", "⠴", "⠦"]
+			loading_symbols_two = ["....", "...", "..", "."]
+
+			for _ in range(time_sleep):
+				for symbol, symbol_two in zip(loading_symbols, loading_symbols_two):
+					from data.loader import bot
+
+					await asyncio.sleep(0.001)
+					
+					if update_stage == 1:
+						send_message = f"💬 Установка обновления - <b>v{version}</b>.\n\n" \
+										f" • {symbol} Проверка подключения к <b>GitHub</b>{symbol_two}\n\n" \
+										"Мы стремимся предоставить вам лучший опыт использования."
+						
+					elif update_stage == 2:
+						send_message = f"💬 Установка обновления - <b>v{version}</b>.\n\n" \
+										f" • <b>Проверка подключения к GitHub.</b>\n" \
+										f" • {symbol} Скачивание обновления с <b>GitHub</b>{symbol_two}\n\n" \
+										"Мы стремимся предоставить вам лучший опыт использования."
+
+					else:
+						send_message = f"💬 Установка обновления - <b>v{version}</b>.\n\n" \
+										f" • <b>Проверка подключения к GitHub.</b>\n" \
+										f" • <b>Скачивание обновления с GitHub.</b>\n" \
+										f" • {symbol} Установка обновления в процессе{symbol_two}\n\n" \
+										"Мы стремимся предоставить вам лучший опыт использования."
+
+					await bot.edit_message_text(text = send_message,
+												chat_id = type.chat.id, 
+												message_id = msg.message_id)
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)

@@ -2,10 +2,10 @@ from data.loader import dp, bot
 from data.config import ConfigBot
 from data.config_Keyboard import ConfigReplyKeyboard, ConfigRoleUsers, ConfigVerifyUsers
 from data.loader_keyboard import LoaderReplyKeyboards, LoaderInlineKeyboards
-
-from data.version_db import get_bot_version
-from data.user_db import load_user_data, is_user_in_data, save_user_data
 from data.states_groups import StartState
+
+from database.requests.version_db import get_bot_version
+from database.requests.user_db import load_user_data, is_user_in_data, save_user_data
 
 from misc.libraries import types, FSMContext
 from misc.loggers import logger
@@ -19,7 +19,7 @@ async def start_command(message: types.Message) -> LoaderReplyKeyboards:
 	USER_DATA_DB = load_user_data()
 	VERSION_BOT = get_bot_version()
 
-	keyboard_start = LoaderReplyKeyboards(message).KEYBOARDS_START
+	start_bot_reply_keyboard = LoaderReplyKeyboards(message).KEYBOARDS_START
 
 	try:
 		"""Объявляем переменную с выводом информации о пользователе: USER_ID"""
@@ -30,7 +30,7 @@ async def start_command(message: types.Message) -> LoaderReplyKeyboards:
 			USER_VERSION_BOT = ConfigBot.USERVERSIONBOT(message)
 
 			if USER_VERSION_BOT == VERSION_BOT:
-				await message.answer(f"{ConfigBot.GETCURRENTHOUR()} <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a> НАЖМИТЕ КНОПКУ ЗАПУСТИТЬ БОТА", reply_markup=keyboard_start)
+				await message.answer(f"{ConfigBot.GETCURRENTHOUR()} <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a> НАЖМИТЕ КНОПКУ ЗАПУСТИТЬ БОТА", reply_markup=start_bot_reply_keyboard)
 			
 			elif USER_VERSION_BOT != VERSION_BOT:
 				await message.answer(f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a>! Рады сообщить, что вышла <b>новая версия</b> нашего бота с улучшениями и новыми возможностями.\n\n" 
@@ -41,7 +41,7 @@ async def start_command(message: types.Message) -> LoaderReplyKeyboards:
 				logger.warning("⚠️ USER_VERSION_BOT не ровняется к текущей версии бота.")
 
 		elif not is_user_in_data(USER_ID, USER_DATA_DB):
-			await message.answer("Привет это бот", reply_markup=keyboard_start)
+			await message.answer("Привет это бот", reply_markup=start_bot_reply_keyboard)
 			
 		else:
 			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных.")

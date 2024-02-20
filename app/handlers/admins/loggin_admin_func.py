@@ -1,11 +1,10 @@
 from data.loader import dp
 from data.config import ConfigBot
 from data.config_Keyboard import ConfigRoleUsers, ConfigVerifyUsers
-
-from data.user_db import load_user_data, is_user_in_data, save_user_data
-from data.admin_db import load_admin_data, is_admin_in_data, save_admin_data
-
 from data.states_groups import LoggInAdminState
+
+from database.requests.user_db import load_user_data, is_user_in_data, save_user_data
+from database.requests.admin_db import load_admin_data, is_admin_in_data, save_admin_data
 
 from misc.libraries import types, FSMContext
 from misc.loggers import logger

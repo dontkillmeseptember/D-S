@@ -1,14 +1,13 @@
 from data.loader import dp, bot
 from data.config import ConfigBot
-from data.config_Keyboard import ConfigReplyKeyboard, ConfigVerifyUsers
+from data.config_Keyboard import ConfigReplyKeyboard, ConfigVerifyUsers, ConfigRoleUsers
 from data.loader_keyboard import LoaderInlineKeyboards, LoaderReplyKeyboards
-
-from data.user_db import load_user_data, is_user_in_data, save_user_data
-from data.rsb_db import load_rsb_data, is_rsb_in_data
-from data.admin_db import load_admin_data, is_admin_in_data, save_admin_data
-from data.version_db import get_bot_version
-
 from data.states_groups import ProfileState
+
+from database.requests.user_db import load_user_data, is_user_in_data, save_user_data
+from database.requests.rsb_db import load_rsb_data, is_rsb_in_data
+from database.requests.admin_db import load_admin_data, is_admin_in_data, save_admin_data
+from database.requests.version_db import get_bot_version
 
 from misc.loggers import logger
 from misc.libraries import types, FSMContext, Union
@@ -18,9 +17,11 @@ from keyboards.users.ReplyKeyboard.ReplyKeyboard_all import hide_keyboard
 """Сохранение message_id для удаления сообщений от бота"""
 PREVIOUS_MESSAGE_ID = None
 
-@dp.message_handler(lambda message: message.text == f"{ConfigReplyKeyboard().PROFILE}")
+@dp.message_handler(lambda message: message.text == ConfigRoleUsers().USER + ConfigReplyKeyboard().PROFILE or
+                                    message.text == ConfigRoleUsers().ADMIN + ConfigReplyKeyboard().PROFILE or
+                                    message.text == ConfigRoleUsers().USER_NEW + ConfigReplyKeyboard().PROFILE)
 @dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_PROFILE", state = [ProfileState.SendCodeAndSocialState, ProfileState.SendUserPasswordState, ProfileState.SendNumberWalletState, ProfileState.SendNumberWalletAndBackProfileState, None])
-async def profile_handler(message_or_callbackQuery: Union[types.Message, types.CallbackQuery], state: FSMContext) -> str:
+async def profile_handler(message_or_callbackQuery: Union[types.Message, types.CallbackQuery], state: FSMContext) -> None:
 	global PREVIOUS_MESSAGE_ID
 
 	"""Объявляем переменные с выводом данных о пользователе и версии бота"""

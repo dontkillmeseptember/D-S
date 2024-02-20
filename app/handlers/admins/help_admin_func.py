@@ -1,7 +1,7 @@
 from data.loader import dp
 from data.config import ConfigBot
 
-from data.admin_db import load_admin_data, is_admin_in_data
+from database.requests.admin_db import load_admin_data, is_admin_in_data
 
 from misc.libraries import types
 from misc.loggers import logger

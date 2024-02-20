@@ -3,12 +3,12 @@ from data.config import ConfigBot
 from data.config_Keyboard import ConfigReplyKeyboard
 from data.loader_keyboard import LoaderReplyKeyboards
 
-from data.version_db import get_bot_version
+from database.requests.version_db import get_bot_version
 
 from misc.libraries import types
 from misc.loggers import logger
 
-@dp.message_handler(lambda message: message.text == f"{ConfigReplyKeyboard().MAINMENU}")
+@dp.message_handler(lambda message: message.text in [ConfigReplyKeyboard().MAINMENU, ConfigReplyKeyboard().FINISH_DOWNLOAD])
 async def main_menu_handler(message: types.Message) -> None:
 	"""Объявляем переменные с выводом версии бота"""
 	VERSION_BOT = get_bot_version()
@@ -21,7 +21,11 @@ async def main_menu_handler(message: types.Message) -> None:
 			"""Объявляем переменные о выводе клавиатуры для возвращения в главное меню"""
 			main_menu_reply_keyboard = LoaderReplyKeyboards(message).KEYBOARDS_MENU
 
-			await message.answer("ТЕСТОВАЯ ВЕРСИЯ", reply_markup=main_menu_reply_keyboard)
+			if message.text == ConfigReplyKeyboard().MAINMENU:
+				await message.answer(f"💬 Добро пожаловать в раздел <b>«{ConfigReplyKeyboard().MAINMENU[4:]}»</b>.\n\n", reply_markup = main_menu_reply_keyboard)
+			
+			elif message.text == ConfigReplyKeyboard().FINISH_DOWNLOAD:
+				await message.answer("УСТАНОВЛЕНА НОВОЕ ОБНОВЛЕНИЕ!", reply_markup = main_menu_reply_keyboard)
 			
 		elif USER_VERSION_BOT != VERSION_BOT:
 			await message.answer(f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a>! Рады сообщить, что вышла <b>новая версия</b> нашего бота с улучшениями и новыми возможностями.\n\n" 

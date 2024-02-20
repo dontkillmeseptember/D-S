@@ -1,12 +1,13 @@
 from misc.libraries import logging, os
 
-"""Создаем обработчик для вывода loggers"""
 def setup_logger(logger_name, log_file, level=logging.INFO):
-	"""Создаем директорию, если она не существует"""
-	log_directory = os.path.dirname(log_file)
-	
-	if not os.path.exists(log_directory):
-		os.makedirs(log_directory)
+	"""
+	Функция для настройки логгера с указанным именем, файлом журнала и необязательным уровнем ведения журнала.
+	Возвращает сконфигурированный логгер.
+	"""
+
+	"""Создаем каталог для журнала"""
+	os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
 	"""Создаем логгер"""
 	logger = logging.getLogger(logger_name)
@@ -26,8 +27,9 @@ def setup_logger(logger_name, log_file, level=logging.INFO):
 	console_handler.setFormatter(formatter)
 	
 	"""Добавляем обработчик к логгеру"""
-	logger.addHandler(file_handler)
-	logger.addHandler(console_handler)
+	for handler in [file_handler, console_handler]:
+		handler.setFormatter(formatter)
+		logger.addHandler(handler)
 	
 	return logger
 

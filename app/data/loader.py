@@ -1,8 +1,8 @@
-from data.user_db import create_user_file
-from data.version_db import create_version_file
-from data.admin_db import create_admin_file
-from data.market_db import create_market_file
-from data.rsb_db import create_rsb_file
+from database.requests.user_db import create_user_file
+from database.requests.version_db import create_version_file
+from database.requests.admin_db import create_admin_file
+from database.requests.market_db import create_market_file
+from database.requests.rsb_db import create_rsb_file
 
 from misc.libraries import dataclass, Bot, Dispatcher, MemoryStorage, os, load_dotenv
 from misc.loggers import logger

@@ -2,12 +2,11 @@ from data.loader import dp, bot
 from data.config import ConfigBot
 from data.config_Keyboard import ConfigReplyKeyboard, ConfigInlineKeyboard
 from data.loader_keyboard import LoaderInlineKeyboards
-
-from data.market_db import load_market_data, is_market_in_data
-from data.user_db import load_user_data, is_user_in_data
-from data.version_db import get_bot_version
-
 from data.states_groups import MarketState
+
+from database.requests.market_db import load_market_data, is_market_in_data
+from database.requests.user_db import load_user_data, is_user_in_data
+from database.requests.version_db import get_bot_version
 
 from misc.libraries import types, FSMContext, Union
 from misc.loggers import logger
@@ -33,17 +32,17 @@ async def market_handler(message_or_callbackQuery: Union[types.Message, types.Ca
 				market_menu_users_inline_keyboard = LoaderInlineKeyboards(message_or_callbackQuery).INLINE_KEYBOARDS_MARKETMENU_USERS
 
 				if isinstance(message_or_callbackQuery, types.Message):
-					await message_or_callbackQuery.answer(f"💬 Добро пожаловать во вкладку {ConfigReplyKeyboard().MARKET}, <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>!\n\n"
+					await message_or_callbackQuery.answer(f"💬 Добро пожаловать во вкладку <b>«{ConfigReplyKeyboard().MARKET[4:]}»</b>.\n\n"
 														   f" • На данный момент у вас <b>{ConfigBot.GETLENUSERS(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
-														   f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>\"{ConfigInlineKeyboard().CHECK_MARKET}\"</b>.", 
+														   f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.", 
 														   reply_markup = market_menu_users_inline_keyboard)
 					
 					await state.finish()
 
 				elif isinstance(message_or_callbackQuery, types.CallbackQuery):
-					await bot.edit_message_text( f"💬 Добро пожаловать во вкладку {ConfigReplyKeyboard().MARKET}, <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>!\n\n"
+					await bot.edit_message_text( f"💬 Добро пожаловать во вкладку <b>«{ConfigReplyKeyboard().MARKET[4:]}»</b>.\n\n"
 										   		 f" • На данный момент у вас <b>{len(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
-										   		 f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>\"{ConfigInlineKeyboard().CHECK_MARKET}\"</b>.",
+										   		 f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.",
 												 message_or_callbackQuery.from_user.id,
 												 message_or_callbackQuery.message.message_id,
 										   		 reply_markup = market_menu_users_inline_keyboard)
@@ -90,9 +89,9 @@ async def back_market_check_user_handler(callback_query: types.CallbackQuery, st
 				market_menu_users_inline_keyboard = LoaderInlineKeyboards(callback_query).INLINE_KEYBOARDS_MARKETMENU_USERS
 
 				await bot.send_message(callback_query.message.chat.id,
-									   f"💬 Добро пожаловать во вкладку {ConfigReplyKeyboard().MARKET}, <a href='https://t.me/{ConfigBot.USERNAME(callback_query)}'>{ConfigBot.USERLASTNAME(callback_query)}</a>!\n\n"
+									   f"💬 Добро пожаловать во вкладку <b>«{ConfigReplyKeyboard().MARKET[4:]}»</b>.\n\n"
 									   f" • На данный момент у вас <b>{len(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
-									   f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>\"{ConfigInlineKeyboard().CHECK_MARKET}\"</b>.",
+									   f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.",
 									   reply_markup = market_menu_users_inline_keyboard)
 					
 				await state.finish()

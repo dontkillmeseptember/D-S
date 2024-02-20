@@ -1,6 +1,6 @@
 from data.config_Keyboard import ConfigInlineKeyboard
 
-from data.user_db import load_user_data
+from database.requests.user_db import load_user_data
 
 from misc.libraries import InlineKeyboardButton, InlineKeyboardMarkup
 from misc.loggers import logger
@@ -22,7 +22,7 @@ def test_create_debugmenu_inlinekeyboard() -> create_admin_inline_keyboard:
 	debug_menu_inline_keyboard = [
 		(ConfigInlineKeyboard().MARKET, "MARKET"),
 		(ConfigInlineKeyboard().CHECK_USER, "CHECK_USER"),
-		(ConfigInlineKeyboard().ADD_VERIFY, "ADD_VERIFY")
+		(ConfigInlineKeyboard().ADD_VERIFY, "ADD_VERIFY"),
 		["ㅤ", "#", ConfigInlineKeyboard().NEXT_EMODJI, "NEXT_DEBUG"]
 	]
 

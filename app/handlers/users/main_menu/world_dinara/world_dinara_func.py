@@ -3,7 +3,7 @@ from data.config import ConfigBot
 from data.config_Keyboard import ConfigReplyKeyboard
 from data.loader_keyboard import LoaderReplyKeyboards
 
-from data.version_db import get_bot_version
+from database.requests.version_db import get_bot_version
 
 from misc.libraries import types
 from misc.loggers import logger
@@ -21,7 +21,7 @@ async def world_dinara_handler(message: types.Message) -> None:
 			"""Объявляем переменные о выводе клавиатуры для возвращения в главное меню вкладки Мир Динары"""
 			world_menu_reply_keyboard = LoaderReplyKeyboards(message).KEYBOARDS_WORLD_MENU
 			
-			await message.answer("ТЕСТОВАЯ ВЕРСИЯ", reply_markup=world_menu_reply_keyboard)
+			await message.answer(f"💬 Добро пожаловать в раздел <b>«{ConfigReplyKeyboard().WORLDDINARA[4:]}»</b>.\n\n", reply_markup=world_menu_reply_keyboard)
 
 		elif USER_VERSION_BOT != VERSION_BOT:
 			await message.answer(f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a>! Рады сообщить, что вышла <b>новая версия</b> нашего бота с улучшениями и новыми возможностями.\n\n" 

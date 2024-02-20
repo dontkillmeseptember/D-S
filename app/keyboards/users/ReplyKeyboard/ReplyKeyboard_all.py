@@ -1,8 +1,8 @@
 from data.config import ConfigBot
 from data.config_Keyboard import ConfigReplyKeyboard, ConfigRoleUsers
 
-from data.user_db import load_user_data, is_user_in_data
-from data.version_db import get_bot_version
+from database.requests.user_db import load_user_data, is_user_in_data
+from database.requests.version_db import get_bot_version
 
 from misc.libraries import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from misc.loggers import logger
@@ -26,17 +26,18 @@ def create_start_keyboard() -> create_reply_keyboard:
 
 """Создаем клавиатуру для главного меню"""
 def create_menu_keyboard(message) -> create_reply_keyboard:
-	"""Объявляем переменную с выводом информации о верификации пользователя"""
+	"""Объявляем переменную с выводом информации о верификации пользователя и его роли"""
 	USER_VERIFICATION = ConfigBot.USERVERIFY(message)
+	USER_SMILE_ROLE = ConfigBot.USERROLE(message)
 
 	if USER_VERIFICATION is None or USER_VERIFICATION is False:
 		main_menu_reply_keyboard = [
-			[ConfigReplyKeyboard().UPDATE + get_bot_version(), ConfigReplyKeyboard().PROFILE]
+			[ConfigReplyKeyboard().UPDATE + get_bot_version(), USER_SMILE_ROLE + ConfigReplyKeyboard().PROFILE]
 		]
 	
 	elif USER_VERIFICATION:
 		main_menu_reply_keyboard = [
-			[ConfigReplyKeyboard().WORLDDINARA, ConfigReplyKeyboard().PROFILE],
+			[ConfigReplyKeyboard().WORLDDINARA, USER_SMILE_ROLE + ConfigReplyKeyboard().PROFILE],
 			[ConfigReplyKeyboard().CHAT],
 			[ConfigReplyKeyboard().UPDATE + get_bot_version(), ConfigReplyKeyboard().BATTLEPASS]
 		]
@@ -81,3 +82,17 @@ def create_world_menu_keyboard(message) -> create_reply_keyboard:
 			logger.warning(f"⚠️ Незарегистрированный пользователь [@{ConfigBot.USERNAME(message)}] попытался войти во вкладку 'Мир Динары'.")
 	else:
 		logger.warning("⚠️ USER_VERIFICATION не ровняется True или False")
+
+
+
+"""Создаем клавиатуру для команды /update для обновления бота"""
+def create_update_keyboard() -> create_reply_keyboard:
+	update_reply_keyboard = [[ConfigReplyKeyboard().DOWNLOAD_UPDATE + get_bot_version() + " •"]]
+
+	return create_reply_keyboard(update_reply_keyboard)
+
+"""Создаем клавиатуру для завершения обновления бота"""
+def create_finish_update_keyboard() -> create_reply_keyboard:
+	finish_update_reply_keyboard = [[ConfigReplyKeyboard().FINISH_DOWNLOAD]]
+
+	return create_reply_keyboard(finish_update_reply_keyboard)
