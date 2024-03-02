@@ -1,6 +1,6 @@
 from misc.libraries import logging, os
 
-def setup_logger(logger_name, log_file, level=logging.INFO):
+def setup_logger(logger_name, log_file, level = logging.INFO):
 	"""
 	Функция для настройки логгера с указанным именем, файлом журнала и необязательным уровнем ведения журнала.
 	Возвращает сконфигурированный логгер.

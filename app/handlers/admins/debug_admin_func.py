@@ -9,6 +9,8 @@ from database.requests.user_db import load_user_data, is_user_in_data, save_user
 from database.requests.admin_db import load_admin_data, is_admin_in_data
 from database.requests.market_db import load_market_data, save_market_data, is_market_in_data
 from database.requests.rsb_db import load_rsb_data, save_rsb_data, is_rsb_in_data, check_rsb_data
+from database.requests.info_update_db import load_update_data, save_update_data, is_update_in_data
+from database.requests.sport_db import load_sport_data, save_sport_data, is_sport_in_data
 
 from misc.libraries import types, Union, FSMContext
 from misc.loggers import logger
@@ -25,6 +27,7 @@ async def debug_admin_command(message_or_callbackQuery: Union[types.Message, typ
 	VERSION_BOT = get_bot_version()
 	MARKET_DATA_DB = load_market_data()
 	RSB_DATA_DB = load_rsb_data()
+	UPDATE_DATA_DB = load_update_data()
 
 	try:
 		"""Объявляем переменную с выводом информации о пользователе: USER_ID"""
@@ -40,14 +43,20 @@ async def debug_admin_command(message_or_callbackQuery: Union[types.Message, typ
 					debug_menu_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_DEBUGMENU
 
 					"""Объявляем переменную с выводом сообщения об информации в управление ботом"""
-					INFO_DEBUG_MENU_ADMIN_MESSAGE = f"💬 Добро пожаловать в панель управления, <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>.\n\n" \
+					INFO_DEBUG_MENU_ADMIN_MESSAGE = f"💬 Добро пожаловать в <b>«Панель Управления»</b>, <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>.\n\n" \
+													 "<b>Информация об пользователях:</b>\n" \
 													f" • Количество зарегистрированных пользователей: <b>{ConfigBot.GETLENUSERS(USER_DATA_DB)}</b>\n" \
 													f" • Количество верифицированных пользователей: <b>{ConfigBot.GETCOUNTVERIFITEDUSERS(USER_DATA_DB)}</b>\n\n" \
+													 "<b>Информация об магазине:</b>\n" \
 													f" • Количество товаров в корзине: <b>{ConfigBot.GETLENUSERS(MARKET_DATA_DB)}</b>\n\n" \
-													f" • Количество отправленных сообщений: {...}\n\n" \
+													 "<b>Информация об мессенджере:</b>\n" \
+													f" • Количество отправленных сообщений: <b>{...}</b>\n\n" \
+													 "<b>Информация об RSB:</b>\n" \
 													f" • Количество зарегистрированных кошельков: <b>{ConfigBot.GETLENUSERS(RSB_DATA_DB)}</b>\n\n" \
+													 "<b>Информация об обновлениях:</b>\n" \
+													f" • Количество вышедших обновлений: <b>{ConfigBot.GETLENUSERS(UPDATE_DATA_DB)}</b>\n" \
 													f" • Текущая версия бота: <b>v{ConfigBot().VERSION}</b>\n\n" \
-													f"Если у вас есть дополнительные вопросы или потребуется дополнительная информация, не стесняйтесь обращаться к нашей <a href='https://t.me/{ConfigBot().AUTHOR}'><b>администрации</b></a>."
+													f"Управляйте с легкостью. Ваш комфорт - наша главная задача!"
 					
 					if isinstance(message_or_callbackQuery, types.Message):
 
@@ -102,7 +111,7 @@ async def debug_admin_command(message_or_callbackQuery: Union[types.Message, typ
 	except Exception as e:
 		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
-"""Создаем обработчик для следующей страницы inline клавиатуры в Debug_Admin"""
+"""Создаем обработчик для следующей страницы inline клавиатуры в Debug_Admin."""
 @dp.callback_query_handler(lambda callback_data: callback_data.data == "NEXT_DEBUG")
 async def next_debug_callback(callback_query: types.CallbackQuery):
 	try:
@@ -117,26 +126,455 @@ async def next_debug_callback(callback_query: types.CallbackQuery):
 	except Exception as e:
 		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
-"""Создаем обработчик для управление RSB - Банком"""
-@dp.callback_query_handler(lambda callback_data: callback_data.data == "RSB")
-@dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_RSB", state = [DebugAdminState.AddRSBForAdminState, DebugAdminState.DeleteRSBForAdminState, DebugAdminState.ReditRSBForAdminState])
-async def rsb_admin_handler(callback_query: types.CallbackQuery, state: FSMContext) -> str:
-	global NUMBER_WALLET_ID
-
-	"""Объявляем переменные для вывода информации о пользователе и администрации"""
+"""Создаем обработчик для управления Кодексом Силы."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "SPORT")
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_SPORT", state = [DebugAdminState.AddSportForAdminState, DebugAdminState.DeleteSportForAdminState])
+async def sport_admin_handler(callback_query: types.CallbackQuery, state: FSMContext) -> str:
+	"""Объявляем переменные для вывода информации о пользователе и администрации."""
 	ADMIN_DATA_DB = load_admin_data()
 	USER_DATA_DB = load_user_data()
 
 	try:
-		"""Объявляем переменную с выводом информации о пользователе: USER_ID"""
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
 		USER_ID = ConfigBot.USERID(callback_query)
 
 		if is_user_in_data(USER_ID, USER_DATA_DB):
 			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
 				CURRENT_STATE = await state.get_state()
 
-				"""Объявляем переменную с выводом клавиатуры с меню для управления банком"""
-				inline_keyboard_menu_rsb_admin = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_MENURSB
+				"""Объявляем переменную с выводом клавиатуры для главного меню управления обновлениями."""
+				menu_sport_admin_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_SPORT_MENU
+
+				INFO_MENU_SPORT_ADMIN_MESSAGE = f"💬 Добро пожаловать в <b>«{ConfigInlineKeyboard().SPORT[2:]}»</b>.\n\n" \
+												f"Здесь вы можете легко управлять упражнениями, добавлять их и удалять.\n\n" \
+												f" • <b>{ConfigInlineKeyboard().ADD_SPORT[2:]}:</b> Используйте эту кнопку для добавление <b>новых</b> упражнений.\n\n" \
+												f" • <b>{ConfigInlineKeyboard().DELETE_SPORT[:-2]}:</b> При необходимости вы можете <b>удалить</b> выбранные упражнения из базы данных.\n\n" \
+												f" • <b>{ConfigInlineKeyboard().EDIT_SPORT[2:-2]}:</b> Нажмите эту кнопку, чтобы <b>редактировать</b> упражнения, которые в данный момент находятся в базе данных.\n\n" \
+												f"Управляйте с легкостью. Ваш комфорт - наша главная задача!"
+
+				if not CURRENT_STATE or CURRENT_STATE.startswith("DebugAdminState:"):
+					await bot.edit_message_text(INFO_MENU_SPORT_ADMIN_MESSAGE,
+												callback_query.from_user.id, 
+												callback_query.message.message_id,
+												reply_markup = menu_sport_admin_inline_keyboard)
+
+					await state.finish()
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для добавление новых упражнений."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "ADD_SPORT")
+async def add_sport_admin_handler(callback_query: types.CallbackQuery):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и обновлениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				"""Выводим клавиатуры для обработчика кнопки назад"""
+				back_sport_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_SPORT_MENU
+
+				await bot.edit_message_text("💬 Для <b>добавления</b> нового упражнения, введите следующую информацию:\n\n"
+						   			   		" • <b>ID Упражнения:</b> [Введите ID Упражнения]\n"
+											" • <b>Эмодзи упражнения:</b> [Введите эмодзи]\n"
+											" • <b>Название callback_query:</b> [Введите название callback_query]\n"
+											" • <b>Название упражнения:</b> [Введите название упражнения]\n"
+											" • <b>Описание к упражнению:</b> [Добавьте описание]\n\n"
+											f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().SPORT[2:]}»</b>.",
+											callback_query.from_user.id,
+											callback_query.message.message_id,
+									   		reply_markup = back_sport_inline_keyboard)
+
+				"""Переходим в фазу, где вводят обновление для добавления."""
+				await DebugAdminState.AddSportForAdminState.set()
+
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик фазы, где администратор вводит ID упражнения и остальную информацию."""
+@dp.message_handler(state = DebugAdminState.AddSportForAdminState)
+async def item_add_sport_admin_handler(message: types.Message) -> str:
+	"""Объявляем переменные для вывода информации о пользователе, администрации и упражнениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+	SPORT_DATA_DB = load_sport_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(message)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				"""Разделяем сообщение на ID обновления и остальную информацию."""
+				PARTS = ConfigBot.USERMESSAGE(message).split()
+
+				if len(PARTS) > 5:
+					"""Выводим из сообщения - Артикул."""
+					ID_SPORT = PARTS[0]
+
+					if is_sport_in_data(ID_SPORT, SPORT_DATA_DB):
+						await message.answer("⚠️ Извините, но похоже, что упражнение с таким <b>ID</b> уже существует в базе данных.\n\n"
+						   					 "Пожалуйста, уточните данные и убедитесь, что вы вводите <b>уникальные</b> ID для каждого упражнения.")
+
+					elif not is_sport_in_data(ID_SPORT, SPORT_DATA_DB):
+						"""Объявляем переменные для разделения PARTS на аспекты."""
+						EMODJI_SPORT, CALLBACK_DATA_SPORT, NAME_SPORT, MESSAGE = PARTS[1], PARTS[2], " ".join(PARTS[3:6]), " ".join(PARTS[6:])
+
+						"""Сохраняем данные о товаре в базе данных товарах."""
+						SPORT_DATA_DB[str(ID_SPORT)] = {
+							"EMODJI_SPORT": EMODJI_SPORT,
+							"CALLBACK_DATA_SPORT": CALLBACK_DATA_SPORT,
+							"NAME_SPORT": NAME_SPORT,
+							"MESSAGE_SPORT": MESSAGE,
+							"DATA_SPORT": ConfigBot.GETTIMENOW()
+						}
+
+						save_sport_data(SPORT_DATA_DB)
+
+						"""Выводим клавиатуры для обработчика кнопки назад."""
+						back_sport_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_SPORT_MENU
+
+						await message.answer(f"💬 Данные обновления добавлены в <b>«{ConfigInlineKeyboard().SPORT[2:]}»</b>.\n\n"
+						   			   		 f" • <b>ID Обновления:</b> <b>{ID_SPORT}</b>\n"
+											 f" • <b>Эмодзи обновления:</b> {EMODJI_SPORT}\n"
+											 f" • <b>Название callback_query:</b> {CALLBACK_DATA_SPORT}\n"
+											 f" • <b>Название обновления:</b> {NAME_SPORT}\n"
+											 f" • <b>Сообщение к обновлению:</b> {MESSAGE}\n\n"
+											 f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().SPORT[2:]}»</b>.",
+											 reply_markup = back_sport_inline_keyboard)
+
+				elif len(PARTS) < 5:
+					await message.answer("⚠️ Извините, но для добавления упражнения необходимо предоставить <b>полную</b> информацию. Пожалуйста, убедитесь, что вы ввели следующие данные:\n\n"
+						   			   	 " • <b>ID Упражнения:</b> [Введите ID Упражения]\n"
+										 " • <b>Эмодзи упражнения:</b> [Введите эмодзи]\n"
+										 " • <b>Название callback_query:</b> [Введите название callback_query]\n"
+										 " • <b>Название упражнения:</b> [Введите название упражнения]\n"
+										 " • <b>Описание к упражнения:</b> [Добавьте свое описание]\n\n"
+										 "Пожалуйста, убедитесь, что все поля <b>заполнены</b>, и повторите попытку.")
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для удаление упражнений."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "DELETE_SPORT")
+async def delete_sport_admin_handler(callback_query: types.CallbackQuery):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и упражнениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+	SPORT_DATA_DB = load_sport_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				"""Выводим клавиатуры для обработчика кнопки назад"""
+				back_sport_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_SPORT_MENU
+
+				await bot.edit_message_text("💬 Для <b>удаления</b> упражнения введите ID, который вы хотели бы удалить:\n\n"
+											f"{(ConfigBot.GETIDSPORT(SPORT_DATA_DB))}\n\n"
+											f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().SPORT[2:]}»</b>.",
+											callback_query.from_user.id,
+											callback_query.message.message_id,
+									   		reply_markup = back_sport_inline_keyboard)
+
+				"""Переходим в фазу, где вводят обновление для добавления."""
+				await DebugAdminState.DeleteSportForAdminState.set()
+
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик фазы, где вводят ID упражнения, чтобы удалить его из базы данных."""
+@dp.message_handler(state = DebugAdminState.DeleteSportForAdminState)
+async def delete_sport_admin_state(message: types.Message):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и упражнениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+	SPORT_DATA_DB = load_sport_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID, USER_MESSAGE."""
+		USER_ID = ConfigBot.USERID(message)
+		USER_MESSAGE = ConfigBot.USERMESSAGE(message)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				if is_sport_in_data(USER_MESSAGE, SPORT_DATA_DB):
+					"""Удаляем обновление из базы данных."""
+					del SPORT_DATA_DB[str(USER_MESSAGE)]
+
+					save_sport_data(SPORT_DATA_DB)
+
+					"""Выводим клавиатуры для обработчика кнопки назад."""
+					back_sport_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_SPORT_MENU
+
+					await message.answer(f"💬 Отлично, упражнение с ID <code>{ConfigBot.USERMESSAGE(message)}</code> успешно удален из базы данных.\n\n"
+						  				 f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().SPORT[2:]}»</b>.",
+										 reply_markup = back_sport_inline_keyboard)
+				else:
+					await message.answer("⚠️ Извините, но похоже, что <b>упражнение</b> с указанным <b>ID</b> не существует в базе данных.\n\n"
+						  				 "Убедитесь, что вы ввели правильный ID, и повторите попытку.")
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для управления Обновлениями."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "UPDATE")
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_UPDATE", state = [DebugAdminState.AddUpdateForAdminState, DebugAdminState.DeleteUpdateForAdminState])
+async def update_admin_handler(callback_query: types.CallbackQuery, state: FSMContext) -> str:
+	"""Объявляем переменные для вывода информации о пользователе и администрации."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				CURRENT_STATE = await state.get_state()
+
+				"""Объявляем переменную с выводом клавиатуры для главного меню управления обновлениями."""
+				menu_update_admin_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_UPDATEMENU
+
+				INFO_MENU_UPDATE_ADMIN_MESSAGE = f"💬 Добро пожаловать в <b>«{ConfigInlineKeyboard().UPDATE[2:]}»</b>.\n\n" \
+												 f"Здесь вы можете легко управлять обновлениями, добавлять их и удалять.\n\n" \
+												 f" • <b>{ConfigInlineKeyboard().ADD_UPDATE[2:]}:</b> Используйте эту кнопку для добавление <b>новых</b> обновлений.\n\n" \
+												 f" • <b>{ConfigInlineKeyboard().DELETE_UPDATE[:-2]}:</b> При необходимости вы можете <b>удалить</b> выбранные обновления из базы данных.\n\n" \
+												 f" • <b>{ConfigInlineKeyboard().EDIT_UPDATE[2:-2]}:</b> Нажмите эту кнопку, чтобы <b>редактировать</b> обновления, которые в данный момент находятся в базе данных.\n\n" \
+												 f"Управляйте с легкостью. Ваш комфорт - наша главная задача!"
+
+				if not CURRENT_STATE or CURRENT_STATE.startswith("DebugAdminState:"):
+					await bot.edit_message_text(INFO_MENU_UPDATE_ADMIN_MESSAGE,
+												callback_query.from_user.id, 
+												callback_query.message.message_id,
+												reply_markup = menu_update_admin_inline_keyboard)
+
+					await state.finish()
+
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для удаления обновлений из бота."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "DELETE_UPDATE")
+async def delete_update_admin_handler(callback_query: types.CallbackQuery):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и обновлениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+	UPDATE_DATA_DB = load_update_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				"""Выводим клавиатуры для обработчика кнопки назад"""
+				back_update_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_UPDATE_MENU
+
+				await bot.edit_message_text("💬 Для <b>удаления</b> обновления введите ID, который вы хотели бы удалить:\n\n"
+											f"{(ConfigBot.GETIDUPDATE(UPDATE_DATA_DB))}\n\n"
+											f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().UPDATE[2:]}»</b>.",
+											callback_query.from_user.id,
+											callback_query.message.message_id,
+									   		reply_markup = back_update_inline_keyboard)
+				
+				"""Переходим в фазу, где вводят ID обновления, чтобы удалить его из базы данных."""
+				await DebugAdminState.DeleteUpdateForAdminState.set()
+
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик фазы, где вводят ID обновления, чтобы удалить его из базы данных."""
+@dp.message_handler(state = DebugAdminState.DeleteUpdateForAdminState)
+async def delete_update_admin_state(message: types.Message):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и обновлениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+	UPDATE_DATA_DB = load_update_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID, USER_MESSAGE."""
+		USER_ID = ConfigBot.USERID(message)
+		USER_MESSAGE = ConfigBot.USERMESSAGE(message)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				if is_update_in_data(USER_MESSAGE, UPDATE_DATA_DB):
+					"""Удаляем обновление из базы данных."""
+					del UPDATE_DATA_DB[str(USER_MESSAGE)]
+
+					save_update_data(UPDATE_DATA_DB)
+
+					"""Выводим клавиатуры для обработчика кнопки назад"""
+					back_update_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_UPDATE_MENU
+
+					await message.answer(f"💬 Отлично, обновление с ID <code>{ConfigBot.USERMESSAGE(message)}</code> успешно удален из базы данных.\n\n"
+						  				 f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().UPDATE[2:]}»</b>.",
+										 reply_markup = back_update_inline_keyboard)
+				else:
+					await message.answer("⚠️ Извините, но похоже, что <b>обновление</b> с указанным <b>ID</b> не существует в базе данных.\n\n"
+						  				 "Убедитесь, что вы ввели правильный ID, и повторите попытку.")
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для добавления обновлений на бота."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "ADD_UPDATE")
+async def add_update_admin_handler(callback_query: types.CallbackQuery):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и обновлениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				"""Выводим клавиатуры для обработчика кнопки назад"""
+				back_update_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_UPDATE_MENU
+
+				await bot.edit_message_text("💬 Для <b>добавления</b> нового обновления, введите следующую информацию:\n\n"
+						   			   		" • <b>ID Обновления:</b> [Введите ID Обновления]\n"
+											" • <b>URL Ссылка на сайт:</b> [Укажите URL ссылку на обновление]\n"
+											" • <b>Эмодзи обновления:</b> [Введите эмодзи]\n"
+											" • <b>Название обновления:</b> [Введите название обновления]\n"
+											" • <b>Сообщение к обновлению:</b> [Добавьте свое сообщение]\n\n"
+											f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().UPDATE[2:]}»</b>.",
+											callback_query.from_user.id,
+											callback_query.message.message_id,
+									   		reply_markup = back_update_inline_keyboard)
+
+				"""Переходим в фазу, где вводят обновление для добавления."""
+				await DebugAdminState.AddUpdateForAdminState.set()
+
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик фазы, где администратор вводит ID обновления и остальную информацию."""
+@dp.message_handler(state = DebugAdminState.AddUpdateForAdminState)
+async def item_add_update_admin_handler(message: types.Message):
+	"""Объявляем переменные для вывода информации о пользователе, администрации и обновлениях."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+	UPDATE_DATA_DB = load_update_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(message)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				"""Разделяем сообщение на ID обновления и остальную информацию."""
+				PARTS = ConfigBot.USERMESSAGE(message).split()
+
+				if len(PARTS) > 5:
+					"""Выводим из сообщения - Артикул"""
+					ID_UPDATE = PARTS[0]
+
+					if is_update_in_data(ID_UPDATE, UPDATE_DATA_DB):
+						await message.answer("⚠️ Извините, но похоже, что обновление с таким <b>ID</b> уже существует в базе данных.\n\n"
+						   					 "Пожалуйста, уточните данные и убедитесь, что вы вводите <b>уникальные</b> ID для каждого обновления.")
+
+					elif not is_update_in_data(ID_UPDATE, UPDATE_DATA_DB):
+						"""Объявляем переменные для разделения PARTS на аспекты."""
+						URL_SITE, EMODJI_UPDATE, NAME_UPDATE, MESSAGE = PARTS[1], PARTS[2], " ".join(PARTS[3:6]), " ".join(PARTS[6:])
+
+						"""Сохраняем данные о товаре в базе данных товарах"""
+						UPDATE_DATA_DB[str(ID_UPDATE)] = {
+							"URL_UPDATE": URL_SITE,
+							"EMODJI_UPDATE": EMODJI_UPDATE,
+							"NAME_UPDATE": NAME_UPDATE,
+							"MESSAGE_UPDATE": MESSAGE,
+							"DATA_UPDATE": ConfigBot.GETTIMENOW()
+						}
+
+						save_update_data(UPDATE_DATA_DB)
+
+						"""Выводим клавиатуры для обработчика кнопки назад"""
+						back_update_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_BACK_UPDATE_MENU
+
+						await message.answer(f"💬 Данные обновления добавлены в <b>«{ConfigInlineKeyboard().UPDATE[2:]}»</b>.\n\n"
+						   			   		 f" • <b>ID Обновления:</b> <code>{ID_UPDATE}</code>\n"
+											 f" • <b>URL Ссылка на сайт:</b> <a href='{URL_SITE}'><b>Ссылка на сайт</b></a>\n"
+											 f" • <b>Эмодзи обновления:</b> {EMODJI_UPDATE}\n"
+											 f" • <b>Название обновления:</b> {NAME_UPDATE}\n"
+											 f" • <b>Сообщение к обновлению:</b> {MESSAGE}\n\n"
+											 f"Благодарим за вашу активность в <b>«{ConfigInlineKeyboard().UPDATE[2:]}»</b>.",
+											 reply_markup = back_update_inline_keyboard)
+
+				elif len(PARTS) < 5:
+					await message.answer("⚠️ Извините, но для добавления обновления необходимо предоставить <b>полную</b> информацию. Пожалуйста, убедитесь, что вы ввели следующие данные:\n\n"
+						   			   	 " • <b>ID Обновления:</b> [Введите ID Обновления]\n"
+										 " • <b>URL Ссылка на сайт:</b> [Укажите URL ссылку на обновление]\n"
+										 " • <b>Эмодзи обновления:</b> [Введите эмодзи]\n"
+										 " • <b>Название обновления:</b> [Введите название обновления]\n"
+										 " • <b>Сообщение к обновлению:</b> [Добавьте свое сообщение]\n\n"
+										 "Пожалуйста, убедитесь, что все поля <b>заполнены</b>, и повторите попытку.")
+			else:
+				logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+		else:
+			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой на регистрацию пользователя: %s", is_user_in_data(USER_ID, USER_DATA_DB))
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для управление RSB - Банком."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "RSB")
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_RSB", state = [DebugAdminState.AddRSBForAdminState, DebugAdminState.DeleteRSBForAdminState, DebugAdminState.ReditRSBForAdminState])
+async def rsb_admin_handler(callback_query: types.CallbackQuery, state: FSMContext) -> str:
+	global NUMBER_WALLET_ID
+
+	"""Объявляем переменные для вывода информации о пользователе и администрации."""
+	ADMIN_DATA_DB = load_admin_data()
+	USER_DATA_DB = load_user_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				CURRENT_STATE = await state.get_state()
+
+				"""Объявляем переменную с выводом клавиатуры с меню для управления банком."""
+				menu_rsb_admin_inline_keyboard = LoaderInlineKeyboardsAdmin().INLINE_KEYBOARDS_MENURSB
 
 				INFO_MENU_RSB_ADMIN_MESSAGE = f"💬 Добро пожаловать в управление <b>RSB - Банком</b>.\n\n" \
 										 	  f"Здесь вы можете легко управлять кошельками и добавлять их. Вот описание к кнопкам:\n\n" \
@@ -149,7 +587,7 @@ async def rsb_admin_handler(callback_query: types.CallbackQuery, state: FSMConte
 					await bot.edit_message_text(INFO_MENU_RSB_ADMIN_MESSAGE,
 												callback_query.from_user.id, 
 												callback_query.message.message_id,
-												reply_markup=inline_keyboard_menu_rsb_admin)
+												reply_markup = menu_rsb_admin_inline_keyboard)
 					
 					NUMBER_WALLET_ID = None
 
@@ -183,7 +621,7 @@ async def redit_rsb_admin_handler(callback_query: types.CallbackQuery) -> DebugA
 										   	"Благодарим за вашу активность в управлении <b>RSB - Банком</b>.",
 											callback_query.from_user.id,
 											callback_query.message.message_id,
-											reply_markup=back_rsb_admin_inline_keyboard)
+											reply_markup = back_rsb_admin_inline_keyboard)
 				
 				"""Переходим в фазу, где вводят ID кошелька для редактирование его из RSB"""
 				await DebugAdminState.ReditRSBForAdminState.set()
@@ -1335,12 +1773,12 @@ async def input_user_id_handler(message: types.Message, state: FSMContext) -> De
 								f" • Имя пользователя на текущий момент: <a href='{ConfigBot.USERNAMEBOT(ConfigBot.USERMESSAGE(message))}'>{ConfigBot.USERLASTNAMEBOT(ConfigBot.USERMESSAGE(message))}</a>\n"
 								f" • <b>USER_ID</b> пользователя: <code>{ConfigBot.USERMESSAGE(message)}</code>\n\n"
 								f"Если у вас есть дополнительные вопросы или потребуется дополнительная информация, не стесняйтесь обращаться к нашей <a href='https://t.me/{ConfigBot().AUTHOR}'><b>администрации</b></a>.\n\n",
-								reply_markup=keyboard_back_verify)
+								reply_markup = keyboard_back_verify)
 
 			await bot.send_message(ConfigBot.USERMESSAGE(message),
-						  		   f"💬 Поздравляем, <a href='{ConfigBot.USERNAMEBOT(ConfigBot.USERMESSAGE(message))}'>{ConfigBot.USERLASTNAMEBOT(ConfigBot.USERMESSAGE(message))}</a> Ваш аккаунт успешно <b>верифицирован</b>\n\n"
+						  		   f"💬 Поздравляем, <a href='{ConfigBot.USERNAMEBOT(ConfigBot.USERMESSAGE(message))}'>{ConfigBot.USERLASTNAMEBOT(ConfigBot.USERMESSAGE(message))}</a> ваш аккаунт успешно <b>верифицирован</b>.\n\n"
 								   f"Если у вас есть дополнительные вопросы или нужна дополнительная помощь, не стесняйтесь обращаться к нашей <a href='https://t.me/{ConfigBot().AUTHOR}'><b>администрации</b></a>.", 
-								   reply_markup=keyboard_menu)
+								   reply_markup = keyboard_menu)
 			
 			await state.finish()
 

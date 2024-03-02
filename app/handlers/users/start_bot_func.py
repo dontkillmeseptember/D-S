@@ -173,19 +173,34 @@ async def nation_handler(message: types.Message, state: FSMContext) -> FSMContex
 			COUNTRY_INFO = ConfigBot.GETCOUNTRYINFO(ENGLISH_NAME)
 
 			if COUNTRY_INFO:
-				"""Выводим клавиатуры для обработчика главного меню"""
+				"""Выводим клавиатуры для обработчика главного меню."""
 				keyboard_menu = LoaderReplyKeyboards(message).KEYBOARDS_MENU
 
-				"""Сохраняем название страны который пользователь ввел"""
+				"""Сохраняем название страны который пользователь ввел."""
 				USER_DATA_DB[str(ConfigBot.USERID(message))]["NATION_USER"] = ConfigBot.USERMESSAGE(message)
 				USER_DATA_DB[str(ConfigBot.USERID(message))]["BOT_ID"] = ConfigBot.GETBOTID()
 				USER_DATA_DB[str(ConfigBot.USERID(message))]["USER_ROLE"] = ConfigRoleUsers().USER_NEW
 				USER_DATA_DB[str(ConfigBot.USERID(message))]["NAME_USER_ROLE"] = ConfigRoleUsers().USER_NAME_NEW
 
+				"""Сохраняем выбранный спорт в базе данных."""
+				USER_DATA_DB[str(ConfigBot.USERID(message))]["SELECTED_SPORT"] = {
+					"SELECTED_SPORT_USER": False
+				}
+
+				"""Сохраняем данные о верификации пользователя."""
 				USER_DATA_DB[str(ConfigBot.USERID(message))]["VERIFY_DATA"] = {
 					"STATUS_VERIFY_USER": ConfigVerifyUsers().NOPE_VERIFY_USER,
 					"VERIFY_USER": False,
 					"CONSIDERATION_VERIFY_USER": False
+				}
+
+				"""Сохраняем данные о уведомлениях."""
+				USER_DATA_DB[str(ConfigBot.USERID(message))]["NOTIFY_DATA"] = {
+					"USER_NOTIFY": {
+						"NOTIFY_RATION": True,
+						"NOTIFY_SPORT": True,
+						"NOTIFY_UPDATE": True
+					}
 				}
 
 				save_user_data(USER_DATA_DB)

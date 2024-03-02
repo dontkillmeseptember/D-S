@@ -3,6 +3,7 @@ from data.config_Keyboard import ConfigReplyKeyboard, ConfigRoleUsers
 
 from database.requests.user_db import load_user_data, is_user_in_data
 from database.requests.version_db import get_bot_version
+from database.requests.info_update_db import load_update_data
 
 from misc.libraries import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from misc.loggers import logger
@@ -28,7 +29,7 @@ def create_start_keyboard() -> create_reply_keyboard:
 def create_menu_keyboard(message) -> create_reply_keyboard:
 	"""Объявляем переменную с выводом информации о верификации пользователя и его роли"""
 	USER_VERIFICATION = ConfigBot.USERVERIFY(message)
-	USER_SMILE_ROLE = ConfigBot.USERROLE(message)
+	USER_SMILE_ROLE = ConfigBot.USERROLE(message) if ConfigBot.USERROLE(message) is not None else ""
 
 	if USER_VERIFICATION is None or USER_VERIFICATION is False:
 		main_menu_reply_keyboard = [
@@ -71,9 +72,6 @@ def create_world_menu_keyboard(message) -> create_reply_keyboard:
 					[ConfigReplyKeyboard().MEMORYDIARY],
 					[ConfigReplyKeyboard().MAINMENU, ConfigReplyKeyboard().MARKET]
 				]
-
-				if USER_ROLE_KEYBOARD == ConfigRoleUsers().ADMIN:
-					world_menu_reply_keyboard.insert(0, [ConfigReplyKeyboard().TEST])
 				
 				return create_reply_keyboard(world_menu_reply_keyboard)
 			else:
@@ -83,7 +81,19 @@ def create_world_menu_keyboard(message) -> create_reply_keyboard:
 	else:
 		logger.warning("⚠️ USER_VERIFICATION не ровняется True или False")
 
+"""Создаем клавиатуру для вкладки "Обновления" для пользователей"""
+def create_info_update_keyboard() -> create_reply_keyboard:
+	"""Объявляем переменную о выводе информации об обновлениях."""
+	UPDATE_DATA_DB = load_update_data()
 
+	"""Выполняем цикл для вывода информации об обновлениях."""
+	info_update_reply_keyboard = [f"{UPDATE_DATA_DB[update_id]['EMODJI_UPDATE']} • {UPDATE_DATA_DB[update_id]['NAME_UPDATE']}" for update_id in reversed(UPDATE_DATA_DB.keys())]
+	info_update_reply_keyboard = [info_update_reply_keyboard[i:i + 3] for i in range(0, len(info_update_reply_keyboard), 3)]
+
+	"""Добавляем кнопку возврата в главное меню."""
+	info_update_reply_keyboard.append([ConfigReplyKeyboard().MAINMENU])
+
+	return create_reply_keyboard(info_update_reply_keyboard, row_width = 3)
 
 """Создаем клавиатуру для команды /update для обновления бота"""
 def create_update_keyboard() -> create_reply_keyboard:

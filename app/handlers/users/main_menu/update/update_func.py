@@ -64,9 +64,9 @@ async def update_handler(message: types.Message) -> None:
 			message_text = await message.answer("ㅤ")
 
 			"""Отправляем сообщение и обновляем информацию о ходе выполнения этапа 1, 2 и 3."""
-			await ConfigBotAsync.UPDATEPROGRESS(msg = message_text, update_stage = 1, time_sleep = 5, version = VERSION_BOT, type = message)
-			await ConfigBotAsync.UPDATEPROGRESS(msg = message_text, update_stage = 2, time_sleep = 10, version = VERSION_BOT, type = message)
-			await ConfigBotAsync.UPDATEPROGRESS(msg = message_text, update_stage = 3, time_sleep = 5, version = VERSION_BOT, type = message)
+			await ConfigBotAsync.UPDATE_PROGRESS(msg = message_text, update_stage = 1, time_sleep = 5, version = VERSION_BOT, type = message)
+			await ConfigBotAsync.UPDATE_PROGRESS(msg = message_text, update_stage = 2, time_sleep = 10, version = VERSION_BOT, type = message)
+			await ConfigBotAsync.UPDATE_PROGRESS(msg = message_text, update_stage = 3, time_sleep = 5, version = VERSION_BOT, type = message)
 
 			"""Удаляем последнее сообщение."""
 			await bot.delete_message(message.chat.id, message_text.message_id)
@@ -89,7 +89,6 @@ async def update_handler(message: types.Message) -> None:
 
 		else:
 			logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных.")
-
 	except RetryAfter as e:
 		logger.warning(f"У пользователя [@{ConfigBot.USERNAME(message)}] превышен контроль отправки сообщений. Повторите попытку через {e.timeout} секунд.")
 

@@ -93,6 +93,17 @@ async def secret_password_handler(message: types.Message, state: FSMContext) -> 
 			USER_DATA_DB[str(ConfigBot.USERID(message))]["USER_ROLE"] = ConfigRoleUsers().ADMIN
 			USER_DATA_DB[str(ConfigBot.USERID(message))]["NAME_USER_ROLE"] = ConfigRoleUsers().ADMIN_NAME
 
+			USER_DATA_DB[str(ConfigBot.USERID(message))]["NOTIFY_DATA"] = {
+				"USER_NOTIFY": {
+					"NOTIFY_RATION": True,
+					"NOTIFY_SPORT": True,
+					"NOTIFY_UPDATE": True
+				},
+				"ADMIN_NOTIFY": {
+					"NOTIFY_RUN": True
+				}
+			}
+
 			save_user_data(USER_DATA_DB)
 
 			await message.answer(f"💬 Поздравляем, <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a>! Вы успешно ввели секретный пароль и завершили регистрацию в базе администраторов.\n\nТеперь у вас есть доступ к функциям администратора.\n\n"

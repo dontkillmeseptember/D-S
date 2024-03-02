@@ -8,15 +8,18 @@ from misc.libraries import (
 	requests,
 	random,
 	re,
-	asyncio
+	asyncio,
+	Union
 )
 
 from misc.loggers import logger
 
-from database.requests.user_db import check_user_data
+from database.requests.user_db import check_user_data, load_user_data
 from database.requests.market_db import check_market_data
 from database.requests.admin_db import load_admin_data, is_admin_in_data
 from database.requests.rsb_db import check_rsb_data, is_rsb_in_data, load_rsb_data
+
+from data.configBaseModel import User
 
 load_dotenv()
 
@@ -155,14 +158,27 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def USERSTATUSVERIFY(cls, obj) -> str:
+	def USERSELECTEDSPORT(cls, obj) -> str:
+		"""Выводим данных пользователя - SELECTED_SPORT_USER Пользователя."""
 		try:
-			"""Выводим данных пользователя - STATUS_VERIFY_USER Пользователя"""
 			if isinstance(obj, (types.Message, types.CallbackQuery)):
-				"""Получаем доступ к базе данных о пользователе"""
+				"""Получаем доступ к базе данных о пользователе."""
 				USER_ID = ConfigBot.USERID(obj)
 				check_user_data_db = check_user_data(USER_ID)
-				"""Выводим информацию о STATUS_VERIFY_USER пользователя"""
+				"""Выводим информацию о SELECTED_SPORT_USER пользователя."""
+				return check_user_data_db.get("SELECTED_SPORT", {}).get("SELECTED_SPORT_USER")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def USERSTATUSVERIFY(cls, obj) -> str:
+		"""Выводим данных пользователя - STATUS_VERIFY_USER Пользователя."""
+		try:
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе."""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о STATUS_VERIFY_USER пользователя."""
 				return check_user_data_db.get("VERIFY_DATA", {}).get("STATUS_VERIFY_USER")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
@@ -252,31 +268,43 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
-	def GETCONSIDERATIONVERIFY(cls, user_data) -> str:
+	def GETCONSIDERATIONVERIFY(cls, user_data, keyboards = False) -> Union[bool, str]:
 		"""Выводим информацию о пользователей которые имеют ключ "CONSIDERATION_VERIFY_USER": true"""
 		try:
-			user_info_list = []
+			user_info_list = [f" • {i+1}: <a href=\"{user_info['USER_NAME']}\">{user_info['USER_LAST_NAME']}</a> — <a href=\"{user_info['VERIFY_DATA']['LINK_PROFILE_USER']}\">Ссылка на Профиль</a> — <code>{user_id}</code>" for i, (user_id, user_info) in enumerate(user_data.items()) if "VERIFY_DATA" in user_info and user_info["VERIFY_DATA"]["CONSIDERATION_VERIFY_USER"]]
 
-			for USER_ID, user_info in user_data.items():
-				if "VERIFY_DATA" in user_info and user_info["VERIFY_DATA"]["CONSIDERATION_VERIFY_USER"]:
-					"""Объявляем переменные для вывода их в сообщения о пользователе"""
-					USER_LAST_NAME = user_info["USER_LAST_NAME"]
-					USER_NAME = user_info["USER_NAME"]
-					USER_LINK_PROFILE = user_info["VERIFY_DATA"]["LINK_PROFILE_USER"]
-
-					"""Добавление информации о пользователе в список"""
-					user_info_list.append(f" • {len(user_info_list) + 1}: <a href=\"{USER_NAME}\">{USER_LAST_NAME}</a> — <a href=\"{USER_LINK_PROFILE}\">Ссылка на Профиль</a> — <code>{USER_ID}</code>")
-
-			if user_info_list:
-				return "\n".join(user_info_list)
+			if keyboards:
+				return bool(user_info_list)
 			else:
-				return " • Нет пользователей на рассмотрении для верификации."
+				return "\n".join(user_info_list) if user_info_list else " • Нет пользователей на рассмотрении для верификации."
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETNOTIFY(cls, obj, users_or_admin, types) -> Union[bool, str]:
+		"""Выводим информацию об уведомлениях."""
+		try:
+			"""Объявляем переменные для доступа к базе данных пользователей и получаем информацию об их уведомления."""
+			USER_ID = ConfigBot.USERID(types)
+
+			"""Выводим информацию об уведомлениях пользователя."""
+			check_user_data_db = check_user_data(USER_ID)
+
+			if not users_or_admin and obj in ("NOTIFY_RATION", "NOTIFY_SPORT", "NOTIFY_UPDATE"):
+				return check_user_data_db.get("NOTIFY_DATA", {}).get("USER_NOTIFY", {}).get(obj)
+			
+			elif users_or_admin and obj == "NOTIFY_RUN":
+				return check_user_data_db.get("NOTIFY_DATA", {}).get("ADMIN_NOTIFY", {}).get(obj)
+			
+			elif obj in ("NOTIFY_RATION", "NOTIFY_SPORT", "NOTIFY_UPDATE"):
+				return check_user_data_db.get("NOTIFY_DATA", {}).get("USER_NOTIFY", {}).get(obj)
+
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
 	def GETRSB(cls, rsb_data, obj, users_or_admin, types) -> str:
-		"""Выводим информацию о кошельке из базы данных"""
+		"""Выводим информацию о кошельке из базы данных."""
 		try:
 			if not users_or_admin:
 				"""Объявляем переменные для доступа к базе данных пользователей и получение информации"""
@@ -521,34 +549,69 @@ class ConfigBot:
 
 	@classmethod
 	def GETARTICLEMARKET(cls, market_data, user_id) -> int:
+		"""Выводим данные товаров из базы данных."""
 		try:
-			"""Объявляем переменную с выводом информации о администрации"""
+			"""Объявляем переменную о выводе информации о администрации."""
 			ADMIN_DATA_DB = load_admin_data()
+			ARTICLE_INFO_LIST = []
 
-			article_info_list = []
+			for ARTICLE_ID, MARKET_DATA_ID in market_data.items():
+				NAME_MARKET = MARKET_DATA_ID["NAME_MARKET"]
+				SITE_MARKET = MARKET_DATA_ID.get("URL_SITE")
 
-			if is_admin_in_data(user_id, ADMIN_DATA_DB):
-				for article_number, market_info in market_data.items():
-					"""Подготовка данных для сообщения"""
-					name_market = market_info["NAME_MARKET"]
-					site_market = market_info["URL_SITE"]
+				if is_admin_in_data(user_id, ADMIN_DATA_DB):
+					if SITE_MARKET:
+						ARTICLE_INFO_LIST.append(f" • <code>{ARTICLE_ID}</code>: {NAME_MARKET} — <a href ='{SITE_MARKET}'>Ссылка на сайт</a>;")
+					else:
+						ARTICLE_INFO_LIST.append(f" • <code>{ARTICLE_ID}</code>: {NAME_MARKET}")
+				else:
+					ARTICLE_INFO_LIST.append(f" • <code>{ARTICLE_ID}</code>: {NAME_MARKET}")
 
-					"""Добавление информации о товаре в список"""
-					article_info_list.append(f" • <code>{article_number}</code>: {name_market} — <a href ='{site_market}'>Ссылка на сайт</a>")
-			
-			if not is_admin_in_data(user_id, ADMIN_DATA_DB):
-				for article_number, market_info in market_data.items():
-					"""Подготовка данных для сообщения"""
-					name_market = market_info["NAME_MARKET"]
-
-					"""Добавление информации о товаре в список"""
-					article_info_list.append(f" • <code>{article_number}</code>: {name_market}")
-
-			"""Если есть товар в корзине, объединяем строки в одну строку"""
-			if article_info_list:
-				return "\n".join(article_info_list)
+			if ARTICLE_INFO_LIST:
+				return "\n".join(ARTICLE_INFO_LIST)
 			else:
-				return " • В данный момент нету товаров в корзине"
+				return " • В данный момент нету товаров в корзине."
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def GETIDSPORT(cls, sport_data) -> str:
+		"""Выводим данные об упражнениях из базы данных."""
+		try:
+			ID_SPORT_LIST = []
+
+			for ID_SPORT, SPORT_DATA_ID in sport_data.items():
+				NAME_SPORT = SPORT_DATA_ID["NAME_SPORT"]
+				MESSAGE_SPORT = SPORT_DATA_ID["MESSAGE_SPORT"]
+
+				"""Ограничиваем вывод сообщения до 50 символов и добавляем многоточие в конце."""
+				TRUNCATED_MESSAGE = MESSAGE_SPORT[:55] + "..." if len(MESSAGE_SPORT) > 55 else MESSAGE_SPORT
+
+				ID_SPORT_LIST.append(f" • <code>{ID_SPORT}</code>: {NAME_SPORT } — «{TRUNCATED_MESSAGE}»")
+
+			if ID_SPORT_LIST:
+				return "\n\n".join(ID_SPORT_LIST)
+			else:
+				return " • В данный момент нету упражнений."
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETIDUPDATE(cls, update_data) -> str:
+		"""Выводим данные об обновлений из базы данных."""
+		try:
+			ID_UPDATE_LIST = []
+
+			for ID_UPDATE, UPDATE_DATA_ID in update_data.items():
+				NAME_UPDATE = UPDATE_DATA_ID["NAME_UPDATE"]
+				SITE_UPDATE = UPDATE_DATA_ID.get("URL_UPDATE")
+
+				ID_UPDATE_LIST.append(f" • <code>{ID_UPDATE}</code>: {NAME_UPDATE} — <a href='{SITE_UPDATE}'>Ссылка на описание обновления</a>;")
+			
+			if ID_UPDATE_LIST:
+				return "\n".join(ID_UPDATE_LIST)
+			else:
+				return " • В данный момент нету обновлений."
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -624,11 +687,34 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 		
 		return None
+	
+	@classmethod
+	def LOADERUSERS(cls):
+		try:
+			"""Загрузка данных пользователей из базы данных."""
+			USER_DATA_DB = load_user_data()
+
+			return [
+				User(
+					id=user_id,
+					bot_id=user_id_data.get("BOT_ID"),
+					name=user_id_data.get("USER_LAST_NAME"),
+					profile=user_id_data.get("USER_NAME"),
+					nation=user_id_data.get("NATION_USER"),
+					user_role=user_id_data.get("NAME_USER_ROLE"),
+					password=user_id_data.get("USER_PASSWORD"),
+					verify=user_id_data.get("VERIFY_DATA", {}).get("STATUS_VERIFY_USER")
+				)
+				for user_id, user_id_data in USER_DATA_DB.items()
+				if isinstance(user_id_data.get("USER_LAST_NAME"), str)
+			]	
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 @dataclass
 class ConfigBotAsync:
 	@classmethod
-	async def UPDATEPROGRESS(cls, msg = None, update_stage = None, time_sleep = None, version = None, type = None) -> None:
+	async def UPDATE_PROGRESS(cls, msg = None, update_stage = None, time_sleep = None, version = None, type = None) -> list:
 		"""Асинхронная функция для обновления прогресса с текстом сообщения и этапом обновления в качестве параметров.
 		
 		Args:
@@ -669,5 +755,41 @@ class ConfigBotAsync:
 					await bot.edit_message_text(text = send_message,
 												chat_id = type.chat.id, 
 												message_id = msg.message_id)
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+		
+	@classmethod
+	async def NOTIFY_ADMINS(cls, database_users = None) -> None:
+		"""Асинхронная функция для отправки сообщения о запуске бота всем админам."""
+		try:
+			from data.loader import bot
+
+			for USER_ID, USER_DATA in database_users.items():
+				"""Получаем информацию об пользователе: NOTIFY_ADMINS, USER_LAST_NAME, USER_NAME"""
+				USER_LAST_NAME = USER_DATA["USER_LAST_NAME"]
+				USER_NAME = USER_DATA["USER_NAME"]
+				NOTIFY_ADMINS = USER_DATA["NOTIFY_DATA"].get("ADMIN_NOTIFY", {}).get("NOTIFY_RUN", False)
+
+				if NOTIFY_ADMINS:	
+					await bot.send_message(chat_id = int(USER_ID), text = f"🔔 • {ConfigBot.GETCURRENTHOUR()}, <a href='{USER_NAME}'>{USER_LAST_NAME}</a>, бот запущен в <b><i>{ConfigBot.GETTIMENOW()}</i></b>")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	async def NOTIFY_UPDATE_USERS(cls, database_users = None, env_version = None) -> None:
+		"""Асинхронная функция для отправки сообщения о обновлении бота всем пользователям."""
+		try:
+			from data.loader import bot
+
+			for USER_ID, USER_DATA in database_users.items():
+				"""Получаем информацию об пользователе: USER_LAST_NAME, USER_NAME"""
+				USER_LAST_NAME = USER_DATA["USER_LAST_NAME"]
+				USER_NAME = USER_DATA["USER_NAME"]
+				NOTIFY_UPDATE = USER_DATA["NOTIFY_DATA"].get("USER_NOTIFY", {}).get("NOTIFY_UPDATE", False)
+
+				if NOTIFY_UPDATE:
+					await bot.send_message(chat_id = int(USER_ID), text = f"💬 <a href='{USER_NAME}'>{USER_LAST_NAME}</a>! Рады сообщить, что вышла <b>новая версия - v{env_version}</b> нашего бота с улучшениями и новыми возможностями.\n\n"
+																		f"❕ Для получения всех новинок и обновлений, пожалуйста, воспользуйтесь командой <b><code>/update</code></b>.\n\n"
+																		f"Спасибо за ваше внимание и активное использование нашего бота! 🤍")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)

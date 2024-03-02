@@ -18,8 +18,8 @@ from keyboards.users.ReplyKeyboard.ReplyKeyboard_all import hide_keyboard
 PREVIOUS_MESSAGE_ID = None
 
 @dp.message_handler(lambda message: message.text == ConfigRoleUsers().USER + ConfigReplyKeyboard().PROFILE or
-                                    message.text == ConfigRoleUsers().ADMIN + ConfigReplyKeyboard().PROFILE or
-                                    message.text == ConfigRoleUsers().USER_NEW + ConfigReplyKeyboard().PROFILE)
+									message.text == ConfigRoleUsers().ADMIN + ConfigReplyKeyboard().PROFILE or
+									message.text == ConfigRoleUsers().USER_NEW + ConfigReplyKeyboard().PROFILE)
 @dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_PROFILE", state = [ProfileState.SendCodeAndSocialState, ProfileState.SendUserPasswordState, ProfileState.SendNumberWalletState, ProfileState.SendNumberWalletAndBackProfileState, None])
 async def profile_handler(message_or_callbackQuery: Union[types.Message, types.CallbackQuery], state: FSMContext) -> None:
 	global PREVIOUS_MESSAGE_ID
@@ -149,18 +149,139 @@ async def profile_handler(message_or_callbackQuery: Union[types.Message, types.C
 	except Exception as e:
 		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
-"""Создаем обработчик входа в банк для пользователей"""
-@dp.callback_query_handler(lambda callback_data: callback_data.data == "RSB_BANK")
-async def rsb_bank_user_handler(callback_query: types.CallbackQuery) -> ProfileState:
-	"""Объявляем переменные с выводом данных о пользователе"""
+"""Создаем обработчик для управления уведомлениями бота для пользователей."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "NOTIFY")
+async def notify_user_handler(callback_query: types.CallbackQuery):
+	"""Объявляем переменные с выводом данных о пользователе и администрации."""
+	ADMIN_DATA_DB = load_admin_data()
 	USER_DATA_DB = load_user_data()
 
 	try:
-		"""Объявляем переменную с выводом информации о пользователе: USER_ID"""
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
 		USER_ID = ConfigBot.USERID(callback_query)
 
 		if is_user_in_data(USER_ID, USER_DATA_DB):
-			"""Объявляем переменную с выводом информации о верификации пользователя"""
+			"""Объявляем переменную с выводом информации о верификации пользователя."""
+			USER_VERIFICATION = ConfigBot.USERVERIFY(callback_query)
+
+			if USER_VERIFICATION is None or USER_VERIFICATION is False:
+				logger.warning(f"⚠️ Неверифицированный пользователь [@{ConfigBot.USERNAME(callback_query)}] попытался зайти в уведомления.")
+			
+			elif USER_VERIFICATION:
+				"""Выводим inline клавиатуру для меню уведомлений."""
+				notify_menu_inline_keyboard = LoaderInlineKeyboards(callback_query).INLINE_KEYBOARDS_NOTIFYMENU
+
+				if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+					"""Объявляем переменную с выводом сообщения об информации уведомлениях для администрации."""
+					INFO_NOTIFY_MENU_MESSAGE = f"💬 Текущая информация об уведомлениях.\n\n" \
+											   f" • Уведомления об <b>«Запуске бота»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_RUN', True, callback_query) else 'Выкл'}</code>\n\n" \
+											   f" • Уведомления об <b>«Рационе»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_RATION', True, callback_query) else 'Выкл'}</code>\n\n" \
+											   f" • Уведомления об <b>«Кодексе силы»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_SPORT', True, callback_query) else 'Выкл'}</code>\n\n" \
+											   f" • Уведомления об <b>«Обновлениях»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_UPDATE', True, callback_query) else 'Выкл'}</code>\n"
+
+				elif not is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+					"""Объявляем переменную с выводом сообщения об информации уведомлениях для пользователей."""
+					INFO_NOTIFY_MENU_MESSAGE = f"💬 Текущая информация об уведомлениях.\n\n" \
+											   f" • Уведомления об <b>«Рационе»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_RATION', False, callback_query) else 'Выкл'}</code>\n\n" \
+											   f" • Уведомления об <b>«Кодексе силы»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_SPORT', False, callback_query) else 'Выкл'}</code>\n\n" \
+											   f" • Уведомления об <b>«Обновлениях»</b> - <code>{'Вкл' if ConfigBot.GETNOTIFY('NOTIFY_UPDATE', False, callback_query) else 'Выкл'}</code>\n"
+
+				else:
+					logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
+				
+				await bot.edit_message_caption(caption = INFO_NOTIFY_MENU_MESSAGE, 
+											   chat_id = callback_query.message.chat.id, 
+											   message_id = callback_query.message.message_id, 
+											   reply_markup = notify_menu_inline_keyboard)
+				
+		else:
+			logger.warning(f"⚠️ Незарегистрированный пользователь [@{ConfigBot.USERNAME(callback_query)}] попытался зайти в уведомления.")
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для обработки callback запросов об выключения/включение уведомлений."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data in ["NOTIFY_RUNS", "NOTIFY_RATIONS", "NOTIFY_SPORTS", "NOTIFY_UPDATES"])
+async def notify_user_handler(callback_query: types.CallbackQuery) -> ProfileState:
+	try:
+		"""Объявляем переменные с выводом информации о пользователе и callback данными."""
+		USER_DATA_DB = load_user_data()
+		CALLBACK_DATA = callback_query.data
+
+		"""Объявляем словарь с данными для уведомлений."""
+		NOTIFY_MAP = {
+			"NOTIFY_RUNS": ("NOTIFY_RUN", True, "ADMIN_NOTIFY", "Запуск бота"),
+			"NOTIFY_RATIONS": ("NOTIFY_RATION", False, "USER_NOTIFY", "Рацион"),
+			"NOTIFY_SPORTS": ("NOTIFY_SPORT", False, "USER_NOTIFY", "Кодекс силы"),
+			"NOTIFY_UPDATES": ("NOTIFY_UPDATE", False, "USER_NOTIFY", "Обновления"),
+		}
+
+		if CALLBACK_DATA in NOTIFY_MAP:
+			NOTIFY_TYPE, IS_ADMIN, NOTIFY_CATEGORY, TEXT_NOTIFY = NOTIFY_MAP[CALLBACK_DATA]
+
+			if ConfigBot.GETNOTIFY(NOTIFY_TYPE, IS_ADMIN, callback_query):
+				USER_DATA_DB[str(ConfigBot.USERID(callback_query))]["NOTIFY_DATA"][NOTIFY_CATEGORY][NOTIFY_TYPE] = False
+
+				await bot.answer_callback_query(callback_query.id, text = f"Уведомления для «{TEXT_NOTIFY}» выключены.")
+
+			elif not ConfigBot.GETNOTIFY(NOTIFY_TYPE, IS_ADMIN, callback_query):
+				USER_DATA_DB[str(ConfigBot.USERID(callback_query))]["NOTIFY_DATA"][NOTIFY_CATEGORY][NOTIFY_TYPE] = True
+
+				await bot.answer_callback_query(callback_query.id, text = f"Уведомления для «{TEXT_NOTIFY}» включены.")
+
+			save_user_data(USER_DATA_DB)
+
+			await notify_user_keyboard_handler(callback_query)
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для изменения inline клавиатуры для раздела связанный с уведомлениями и избежания рекурсии."""
+async def notify_user_keyboard_handler(callback_query: types.CallbackQuery):
+	try:
+		"""Объявляем переменные с выводом информации о администрации и вывод данных о пользователе: USER_ID."""
+		ADMIN_DATA_DB = load_admin_data()
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		"""Объявляем словарь с данными для уведомлений."""
+		NOTIFY_TYPES = {
+			'NOTIFY_RUN': 'Уведомления об <b>«Запуске бота»</b>',
+			'NOTIFY_RATION': 'Уведомления об <b>«Рационе»</b>',
+			'NOTIFY_SPORT': 'Уведомления об <b>«Кодексе силы»</b>',
+			'NOTIFY_UPDATE': 'Уведомления об <b>«Обновлениях»</b>'
+		}
+
+		INFO_NOTIFY_MENU_MESSAGE = f"💬 Текущая информация об уведомлениях.\n\n"
+
+		if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+			INFO_NOTIFY_MENU_MESSAGE += " • " + " • ".join([f"{value} - <code>{'Вкл' if ConfigBot.GETNOTIFY(key, True, callback_query) else 'Выкл'}</code>\n\n" for key, value in NOTIFY_TYPES.items()])
+		
+		elif not is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+			INFO_NOTIFY_MENU_MESSAGE += " • " + " • ".join([f"{value} - <code>{'Вкл' if ConfigBot.GETNOTIFY(key, False, callback_query) else 'Выкл'}</code>\n\n" for key, value in NOTIFY_TYPES.items() if key != 'NOTIFY_RUN'])
+
+		else:
+			logger.warning(f"⚠️ Незарегистрированный пользователь [@{ConfigBot.USERNAME(callback_query)}] попытался зайти в уведомления.")
+
+		"""Выводим inline клавиатуру для меню уведомлений."""
+		notify_menu_inline_keyboard = LoaderInlineKeyboards(callback_query).INLINE_KEYBOARDS_NOTIFYMENU
+
+		await bot.edit_message_caption(caption = INFO_NOTIFY_MENU_MESSAGE, 
+									   chat_id = callback_query.message.chat.id, 
+									   message_id = callback_query.message.message_id,
+									   reply_markup = notify_menu_inline_keyboard)
+	except Exception as e:
+		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+"""Создаем обработчик для входа в банк для пользователей."""
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "RSB_BANK")
+async def rsb_bank_user_handler(callback_query: types.CallbackQuery) -> ProfileState:
+	"""Объявляем переменные с выводом данных о пользователе."""
+	USER_DATA_DB = load_user_data()
+
+	try:
+		"""Объявляем переменную с выводом информации о пользователе: USER_ID."""
+		USER_ID = ConfigBot.USERID(callback_query)
+
+		if is_user_in_data(USER_ID, USER_DATA_DB):
+			"""Объявляем переменную с выводом информации о верификации пользователя."""
 			USER_VERIFICATION = ConfigBot.USERVERIFY(callback_query)
 
 			if USER_VERIFICATION is None or USER_VERIFICATION is False:
@@ -178,11 +299,11 @@ async def rsb_bank_user_handler(callback_query: types.CallbackQuery) -> ProfileS
 												   message_id = callback_query.message.message_id,
 												   reply_markup = back_profile_inline_keyboard)
 
-					"""Переходим в фазу, где пользователь вводит ID кошелек для подключения"""
+					"""Переходим в фазу, где пользователь вводит ID кошелек для подключения."""
 					await ProfileState.SendNumberWalletState.set()
 				
 				elif USER_REGISTOR_WALLET:
-					"""Объявляем переменную с выводом сообщения о информации кошелька"""
+					"""Объявляем переменную с выводом сообщения о информации кошелька."""
 					INFO_RSB_USER_MESSAGE = f"💬 Текущая информация о кошельке.\n\n" \
 											f" • ID кошелька: <span class='tg-spoiler'><b>{ConfigBot.GETRSB(None, 'WALLET', False, callback_query)}</b></span>\n\n" \
 											f" • Баланс кошелька: <code>{ConfigBot.GETRSB(None, 'ETH', False, callback_query)}</code> <b>ETH</b> - <code>{ConfigBot.GETRSB(None, 'USD', False, callback_query)}</code> <b>USD</b> ~ <code>{ConfigBot.GETRSB(None, 'RUB', False, callback_query)}</code> <b>RUB</b>\n\n" \
@@ -340,8 +461,9 @@ async def send_user_password_handler(message: types.Message) -> ProfileState:
 """Создаем обработчика фазы, где пользователь вводит ПОДТВЕРЖДАЮ для удаления учетной записи"""
 @dp.message_handler(state = ProfileState.SendApprovedState)
 async def send_user_password_handler(message: types.Message, state: FSMContext) -> FSMContext:
-	"""Объявляем переменные с выводом данных о пользователе"""
+	"""Объявляем переменные с выводом данных о пользователе и администраторах"""
 	USER_DATA_DB = load_user_data()
+	ADMIN_DATA_DB = load_admin_data()
 
 	try:
 		"""Объявляем переменную c выводом информации о пользователя: USER_MESSAGE, USER_ID"""
@@ -349,7 +471,12 @@ async def send_user_password_handler(message: types.Message, state: FSMContext) 
 		USER_ID = ConfigBot.USERID(message)
 
 		if USER_MESSAGE == "ПОДТВЕРЖДАЮ":
-			"""Удаляем полностью все данные пользователя в базе данных пользователей"""
+			"""Удаляем полностью все данные пользователя в базе данных пользователей и администраторов"""
+			if is_admin_in_data(USER_ID, ADMIN_DATA_DB):
+				del ADMIN_DATA_DB[str(USER_ID)]
+
+				save_admin_data(ADMIN_DATA_DB)
+
 			del USER_DATA_DB[str(USER_ID)]
 
 			save_user_data(USER_DATA_DB)
