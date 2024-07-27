@@ -7,7 +7,7 @@ from data.states_groups import StartState
 from database.requests.version_db import get_bot_version
 from database.requests.user_db import load_user_data, is_user_in_data, save_user_data
 
-from misc.libraries import types, FSMContext
+from misc.libraries import types, FSMContext, Union
 from misc.loggers import logger
 
 from keyboards.users.ReplyKeyboard.ReplyKeyboard_all import hide_keyboard
@@ -107,6 +107,9 @@ async def password_handler(message: types.Message, state: FSMContext) -> StartSt
 					await message.answer("⚠️ Пароль должен состоять из <b>12 символов</b> и содержать хотя бы <b>одну цифру</b>.")
 
 				else:
+					"""Выводим Inline клавиатуру для обработчика пропуска фазы ввода нации для пользователя."""
+					inline_keyboard_skip_phase_nation = LoaderInlineKeyboards(message).INLINE_KEYBOARDS_SKIP_PHASE_NATION
+
 					"""Сохраняем пароль пользователя в базе данных"""
 					USER_DATA_DB[str(USER_ID)]["USER_PASSWORD"] = USER_MESSAGE
 					
@@ -118,7 +121,7 @@ async def password_handler(message: types.Message, state: FSMContext) -> StartSt
 					"""Проверяем есть ли уже страна у пользователя или нет"""
 					if USER_NATION == None:
 						await message.answer(f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a>, отлично идем! Теперь уточним вашу <b>нацию</b> или <b>страну</b>.\n\n"
-											"❕ Пожалуйста, укажите свою <b>национальность</b> или <b>страну проживания</b>.")
+											"❕ Пожалуйста, укажите свою <b>национальность</b> или <b>страну проживания</b>.", reply_markup = inline_keyboard_skip_phase_nation)
 
 						"""Переходим в фазу, где вводит свою нацию/страну"""
 						await StartState.NationUserState.set()
@@ -155,68 +158,99 @@ async def password_handler(message: types.Message, state: FSMContext) -> StartSt
 
 """Создаем обработчика фазы, где пользователь вводит нацию/страну"""
 @dp.message_handler(state=StartState.NationUserState)
-async def nation_handler(message: types.Message, state: FSMContext) -> FSMContext:
+@dp.callback_query_handler(lambda callback_data: callback_data.data == "SKIP_PHASE_NATION", state = [StartState.NationUserState])
+async def nation_handler(message_or_callbackQuery: Union[types.Message, types.CallbackQuery], state: FSMContext) -> FSMContext:
 	"""Объявляем переменную с выводом информации о пользователе"""
 	USER_DATA_DB = load_user_data()
 
 	try:
+		"""Выводим клавиатуры для обработчика главного меню."""
+		keyboard_menu = LoaderReplyKeyboards(message_or_callbackQuery).KEYBOARDS_MENU
+		
 		"""Объявляем переменную с выводом информации о пользователе: USER_ID"""
-		USER_ID = ConfigBot.USERID(message)
+		USER_ID = ConfigBot.USERID(message_or_callbackQuery)
 
 		"""Проверяем есть ли пользователь в базе данных"""
 		if is_user_in_data(USER_ID, USER_DATA_DB):
-			"""Объявляем переменную с выводом информации о пользователе: USER_MESSAGE"""
-			USER_MESSAGE = ConfigBot.USERMESSAGE(message)
+			"""Объявляем переменную с выводом сообщение о завершение регистрации учетной записи бота."""
+			END_REGISTER_MESSAGE = f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>, поздравляем! <b>Регистрация завершена</b>. Теперь вы можете наслаждаться всеми возможностями нашего бота.\n\n" \
+								   f"Если у вас возникнут вопросы или нужна помощь, не стесняйтесь обращаться нашей <a href='https://t.me/{ConfigBot().AUTHOR}'><b>администрации</b></a>."
 
-			"""Объявляем переменные с отправкой данных о введенной нации пользователем"""
-			ENGLISH_NAME = ConfigBot.TRANSLATETOENGLISH(USER_MESSAGE)
-			COUNTRY_INFO = ConfigBot.GETCOUNTRYINFO(ENGLISH_NAME)
+			"""Сохраняем переменные которые пользователь ввел вовремя фазы регистрации учетной записи бота."""
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["BOT_ID"] = ConfigBot.GETBOTID()
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["USER_ROLE"] = ConfigRoleUsers().USER_NEW
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["NAME_USER_ROLE"] = ConfigRoleUsers().USER_NAME_NEW
 
-			if COUNTRY_INFO:
-				"""Выводим клавиатуры для обработчика главного меню."""
-				keyboard_menu = LoaderReplyKeyboards(message).KEYBOARDS_MENU
+			"""Сохраняем выбранный спорт в базе данных."""
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["SELECTED_SPORT"] = {
+				"SELECTED_SPORT_USER": False,
+				"SELECTED_SPORT_NAME": None
+			}
+
+			"""Сохраняем данные о верификации пользователя."""
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["VERIFY_DATA"] = {
+				"STATUS_VERIFY_USER": ConfigVerifyUsers().NOPE_VERIFY_USER,
+				"VERIFY_USER": False,
+				"CONSIDERATION_VERIFY_USER": False
+			}
+
+			"""Сохраняем текущие фазы вовремя изменения кошелька, редактирования упражнений и т.д."""
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["STATES_USER"] = {
+				"NUMBER_WALLET_ID": None,
+				"SPORT_ID": None,
+				"PREVIOUS_MESSAGE_ID": None
+			}
+
+			"""Сохраняем данные о уведомлениях."""
+			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["NOTIFY_DATA"] = {
+				"USER_NOTIFY": {
+					"NOTIFY_RATION": True,
+					"NOTIFY_SPORT": True,
+					"NOTIFY_UPDATE": True
+				}
+			}
+
+			if isinstance(message_or_callbackQuery, types.Message):
+				"""Объявляем переменную с выводом информации о пользователе: USER_MESSAGE"""
+				USER_MESSAGE = ConfigBot.USERMESSAGE(message_or_callbackQuery)
+
+				"""Объявляем переменные с отправкой данных о введенной нации пользователем"""
+				ENGLISH_NAME = ConfigBot.TRANSLATETOENGLISH(USER_MESSAGE)
+				COUNTRY_INFO = ConfigBot.GETCOUNTRYINFO(ENGLISH_NAME)
+
+				if COUNTRY_INFO:
+					"""Сохраняем название страны который пользователь ввел."""
+					USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["NATION_USER"] = ConfigBot.USERMESSAGE(message_or_callbackQuery)
+
+					save_user_data(USER_DATA_DB)
+
+					await message_or_callbackQuery.answer(END_REGISTER_MESSAGE, reply_markup=keyboard_menu)
+					
+					await state.finish()
+
+				elif not COUNTRY_INFO:
+					await message_or_callbackQuery.answer("⚠️ Похоже, что вы ввели <b>несуществующую</b> страну. Пожалуйста, введите <b>настоящую</b> страну.")
+				
+				else:
+					logger.warning("COUNTRY_INFO не ровняется никакой стране или нации.")
+			
+			elif isinstance(message_or_callbackQuery, types.CallbackQuery):
+				"""Удаляем старое сообщение."""
+				await bot.delete_message(message_or_callbackQuery.message.chat.id, message_or_callbackQuery.message.message_id)
 
 				"""Сохраняем название страны который пользователь ввел."""
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["NATION_USER"] = ConfigBot.USERMESSAGE(message)
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["BOT_ID"] = ConfigBot.GETBOTID()
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["USER_ROLE"] = ConfigRoleUsers().USER_NEW
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["NAME_USER_ROLE"] = ConfigRoleUsers().USER_NAME_NEW
-
-				"""Сохраняем выбранный спорт в базе данных."""
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["SELECTED_SPORT"] = {
-					"SELECTED_SPORT_USER": False
-				}
-
-				"""Сохраняем данные о верификации пользователя."""
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["VERIFY_DATA"] = {
-					"STATUS_VERIFY_USER": ConfigVerifyUsers().NOPE_VERIFY_USER,
-					"VERIFY_USER": False,
-					"CONSIDERATION_VERIFY_USER": False
-				}
-
-				"""Сохраняем данные о уведомлениях."""
-				USER_DATA_DB[str(ConfigBot.USERID(message))]["NOTIFY_DATA"] = {
-					"USER_NOTIFY": {
-						"NOTIFY_RATION": True,
-						"NOTIFY_SPORT": True,
-						"NOTIFY_UPDATE": True
-					}
-				}
+				USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["NATION_USER"] = None
 
 				save_user_data(USER_DATA_DB)
 
-				await message.answer(f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message)}'>{ConfigBot.USERLASTNAME(message)}</a>, поздравляем! <b>Регистрация завершена</b>. Теперь вы можете наслаждаться всеми возможностями нашего бота.\n\n"
-						 			 f"Если у вас возникнут вопросы или нужна помощь, не стесняйтесь обращаться нашей <a href='https://t.me/{ConfigBot().AUTHOR}'><b>администрации</b></a>.", reply_markup=keyboard_menu)
+				await bot.send_message(chat_id = message_or_callbackQuery.message.chat.id, text = END_REGISTER_MESSAGE, reply_markup = keyboard_menu)
 				
 				await state.finish()
 
-			elif not COUNTRY_INFO:
-				await message.answer("⚠️ Похоже, что вы ввели <b>несуществующую</b> страну. Пожалуйста, введите <b>настоящую</b> страну.")
-			
 			else:
-				logger.warning("COUNTRY_INFO не ровняется никакой стране или нации.")
+				logger.warning("⚠️ Произошел сбой с ISINSTANCE.")
 		else:
-			logger.warning(f"⚠️ Незарегистрированный пользователь [@{ConfigBot.USERNAME(message)}] попытался ввести нацию/страну.")
+			logger.warning(f"⚠️ Незарегистрированный пользователь [@{ConfigBot.USERNAME(message_or_callbackQuery)}] попытался ввести нацию/страну.")
 	except Exception as e:
 		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 

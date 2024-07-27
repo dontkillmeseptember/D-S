@@ -39,11 +39,23 @@ def create_debugmenu_inlinekeyboard_next() -> create_admin_inline_keyboard:
 		[(ConfigInlineKeyboard().SPORT, "SPORT")],
 		[
 			(ConfigInlineKeyboard().BACK_EMODJI, "BACK_DEBUG"),
-			("ㅤ", "#")
+			(ConfigInlineKeyboard().NEXT_EMODJI, "NEXT_DEBUG_THREE")
 		]
 	]
 
 	return create_admin_inline_keyboard(debug_menu_next_inline_keyboard, row_width = 2)
+
+"""Создаем Inline клавиатуру для вкладки "Панель управления" для администрации, третья страница."""
+def create_debugmenu_inlinekeyboard_next_three() -> create_admin_inline_keyboard:
+	debug_menu_next_three_inline_keyboard = [
+		[(ConfigInlineKeyboard().RATION, "RATION")],
+		[
+			(ConfigInlineKeyboard().BACK_EMODJI, "BACK_DEBUG_TWO"),
+			("ㅤ", "#")
+		]
+	]
+
+	return create_admin_inline_keyboard(debug_menu_next_three_inline_keyboard, row_width = 2)
 
 """Создаем inline клавиатуру назад для администрации"""
 def create_back_inlinekeyboard() -> create_admin_inline_keyboard:
@@ -96,7 +108,7 @@ def create_menu_rsb_admin_inlinekeyboard() -> create_admin_inline_keyboard:
 			(ConfigInlineKeyboard().DELETE_RSB, "DELETE_RSB")
 		],
 		[(ConfigInlineKeyboard().REDIT_RSB, "REDIT_RSB")],
-		[(ConfigInlineKeyboard().BACK, "NEXT_DEBUG_TWO")]
+		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG_INLINE_KEYBOARD_TWO")]
 	]
 
 	return create_admin_inline_keyboard(menu_rsb_admin_inline_keyboard, row_width = 2)
@@ -129,7 +141,7 @@ def create_back_redit_rsb_admin_inlinekeybard() -> create_admin_inline_keyboard:
 
 	return create_admin_inline_keyboard(back_redit_rsb_admin_inlinke_keyboard)
 
-"""Создаем Inline клавиатуру для управления обновлениями"""
+"""Создаем Inline клавиатуру для управления обновлениями."""
 def create_menu_update_admin_inlinekeyboard() -> create_admin_inline_keyboard:
 	menu_update_admin_inline_keyboard = [
 		[
@@ -137,12 +149,34 @@ def create_menu_update_admin_inlinekeyboard() -> create_admin_inline_keyboard:
 			(ConfigInlineKeyboard().DELETE_UPDATE, "DELETE_UPDATE")
 		],
 		[(ConfigInlineKeyboard().EDIT_UPDATE, "EDIT_UPDATE")],
-		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG")]
+		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG_INLINE_KEYBOARD_TWO")]
 	]
 
 	return create_admin_inline_keyboard(menu_update_admin_inline_keyboard, row_width = 2)
 
-"""Создаем Inline клавиатуру назад вовремя фазы добавления обновления"""
+"""Создаем Inline клавиатуру для редактирования обновления."""
+def create_menu_edit_update_admin_inlinekeyboard() -> create_admin_inline_keyboard:
+	menu_edit_update_admin_inline_keyboard = [
+		[
+			(ConfigInlineKeyboard().EDIT_MESSAGE_UPDATE, "EDIT_MESSAGE_UPDATE"),
+			(ConfigInlineKeyboard().EDIT_NAME_UPDATE, "EDIT_NAME_UPDATE")
+		],
+		[(ConfigInlineKeyboard().BACK, "BACK_UPDATE")],
+		[
+			(ConfigInlineKeyboard().EDIT_LINK_UPDATE, "EDIT_LINK_UPDATE"),
+			(ConfigInlineKeyboard().EDIT_EMOJI_UPDATE, "EDIT_EMOJI_UPDATE")
+		]
+	]
+
+	return create_admin_inline_keyboard(menu_edit_update_admin_inline_keyboard, row_width = 2)
+
+"""Создаем Inline клавиатуру для возвращения вовремя фазы редактирования обновления."""
+def create_back_edit_update_inlinekeyboard() -> create_admin_inline_keyboard:
+	back_edit_update_inline_keyboard = [[(ConfigInlineKeyboard().BACK, "BACK_EDIT_UPDATE")]]
+
+	return create_admin_inline_keyboard(back_edit_update_inline_keyboard)
+
+"""Создаем Inline клавиатуру назад вовремя фазы добавления обновления."""
 def create_back_update_inlinekeyboard() -> create_admin_inline_keyboard:
 	back_update_inline_keyboard = [[(ConfigInlineKeyboard().BACK, "BACK_UPDATE")]]
 
@@ -156,7 +190,7 @@ def create_menu_sport_admin_inlinekeyboard() -> create_admin_inline_keyboard:
 			(ConfigInlineKeyboard().DELETE_SPORT, "DELETE_SPORT")
 		],
 		[(ConfigInlineKeyboard().EDIT_SPORT, "EDIT_SPORT")],
-		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG")]
+		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG_INLINE_KEYBOARD_TWO")]
 	]
 
 	return create_admin_inline_keyboard(menu_sport_admin_inline_keyboard, row_width = 2)
@@ -166,3 +200,35 @@ def create_back_sport_inlinekeyboard() -> create_admin_inline_keyboard:
 	back_sport_inline_keyboard = [[(ConfigInlineKeyboard().BACK, "BACK_SPORT")]]
 
 	return create_admin_inline_keyboard(back_sport_inline_keyboard)
+
+"""Создаем Inline клавиатуру для редактирования упражнений."""
+def create_menu_edit_sport_admin_inlinekeyboard() -> create_admin_inline_keyboard:
+	menu_edit_sport_admin_inline_keyboard = [
+		[(ConfigInlineKeyboard().DELETE_WORKOUT, "DELETE_WORKOUT")],
+		[
+			(ConfigInlineKeyboard().EDIT_SPORT_DESCRIPTION, "EDIT_SPORT_DESCRIPTION"),
+			(ConfigInlineKeyboard().ADD_WORKOUT, "ADD_WORKOUT")
+		],
+		[(ConfigInlineKeyboard().BACK, "BACK_SPORT")]
+	]
+
+	return create_admin_inline_keyboard(menu_edit_sport_admin_inline_keyboard, row_width = 2)
+
+"""Создаем Inline клавиатуру назад вовремя фаз редактирования упражнения."""
+def create_back_edit_sport_admin_inlinekeybard() -> create_admin_inline_keyboard:
+	back_edit_sport_admin_inlinke_keyboard = [[(ConfigInlineKeyboard().BACK, "BACK_EDIT_SPORT")]]
+
+	return create_admin_inline_keyboard(back_edit_sport_admin_inlinke_keyboard)
+
+"""Создаем Inline клавиатуры для управления Рационом."""
+def create_menu_ration_admin_inlinekeyboard() -> create_admin_inline_keyboard:
+	menu_ration_admin_inline_keyboard = [
+		[
+			(ConfigInlineKeyboard().ADD_RATION, "ADD_RATION"),
+			(ConfigInlineKeyboard().DELETE_RATION, "DELETE_RATION")
+		],
+		[(ConfigInlineKeyboard().EDIT_RATION, "EDIT_RATION")],
+		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG_INLINE_KEYBOARD_THREE")]
+	]
+
+	return create_admin_inline_keyboard(menu_ration_admin_inline_keyboard, row_width = 2)

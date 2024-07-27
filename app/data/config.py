@@ -18,6 +18,8 @@ from database.requests.user_db import check_user_data, load_user_data
 from database.requests.market_db import check_market_data
 from database.requests.admin_db import load_admin_data, is_admin_in_data
 from database.requests.rsb_db import check_rsb_data, is_rsb_in_data, load_rsb_data
+from database.requests.sport_db import check_sport_data
+from database.requests.info_update_db import check_update_data
 
 from data.configBaseModel import User
 
@@ -69,7 +71,7 @@ class ConfigBot:
 				return check_user_data_db.get("BOT_ID")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
-		
+	
 	@classmethod
 	def USERNATION(cls, obj) -> str:
 		try:
@@ -123,6 +125,19 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
+	def GETMESSAGEID(cls, obj) -> int:
+		try:
+			"""Выводим данные пользователя - PREVIOUS_MESSAGE_ID Пользователя"""
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе"""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о PREVIOUS_MESSAGE_ID пользователя"""
+				return check_user_data_db.get("STATES_USER", {}).get("PREVIOUS_MESSAGE_ID")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
 	def USERNAMEBOT(cls, obj) -> str:
 		"""Выводим данных пользователя - USER_NAME Пользователя"""
 		try:
@@ -167,6 +182,32 @@ class ConfigBot:
 				check_user_data_db = check_user_data(USER_ID)
 				"""Выводим информацию о SELECTED_SPORT_USER пользователя."""
 				return check_user_data_db.get("SELECTED_SPORT", {}).get("SELECTED_SPORT_USER")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def USERSELECTEDSPORTNAME(cls, obj) -> str:
+		"""Выводим данных пользователя - SELECTED_SPORT_NAME Пользователя."""
+		try:
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе."""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о SELECTED_SPORT_NAME пользователя."""
+				return check_user_data_db.get("SELECTED_SPORT", {}).get("SELECTED_SPORT_NAME")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def USERSTATUSSPORTID(cls, obj) -> str:
+		"""Выводим данных пользователя - STATUS_USER Пользователя."""
+		try:
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе."""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о STATUS_USER пользователя."""
+				return check_user_data_db.get("STATES_USER", {}).get("SPORT_ID")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -236,6 +277,19 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
+	def USERSTATUSUPDATEID(cls, obj) -> str:
+		try:
+			"""Выводим данные пользователя - UPDATE_ID Пользователя."""
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе."""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о UPDATE_ID пользователя."""
+				return check_user_data_db.get("STATES_USER", {}).get("UPDATE_ID")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
 	def USERMESSAGE(cls, message) -> str:
 		"""Вводим сообщение пользователя для регистрации пароля и т.д."""
 		return message.text
@@ -299,6 +353,48 @@ class ConfigBot:
 			elif obj in ("NOTIFY_RATION", "NOTIFY_SPORT", "NOTIFY_UPDATE"):
 				return check_user_data_db.get("NOTIFY_DATA", {}).get("USER_NOTIFY", {}).get(obj)
 
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETUPDATE(cls, update_id, obj) -> str:
+		"""Выводим информацию об обновлении."""
+		try:
+			check_update_data_db = check_update_data(update_id)
+
+			if obj in ("NAME_UPDATE", "MESSAGE_UPDATE", "DATA_UPDATE", "URL_UPDATE"):
+				return check_update_data_db.get(obj)
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETSPORT(cls, sport_id, obj) -> str:
+		"""Выводим информацию о спорте."""
+		try:
+			check_sport_data_db = check_sport_data(sport_id)
+
+			if obj in ("NAME_SPORT", "MESSAGE_SPORT", "DATA_SPORT"):
+				return check_sport_data_db.get(obj)
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETSELECTEDSPORT(cls, type, sport_data) -> str:
+		"""Выводим информацию о выбранном спорте."""
+		try:
+			"""Объявляем переменные с выводом информации о пользователе: USER_SPORT."""
+			USER_SPORT = ConfigBot.USERSELECTEDSPORT(type)
+
+			if USER_SPORT:
+				"""Создаем цикл который выводит нужную информацию о спорте который выбрал пользователь."""
+				for ID_SPORT, SPORT_DATA_ID in sport_data.items():
+					TEXT = f"{SPORT_DATA_ID['CALLBACK_DATA_SPORT']}"
+
+					if ConfigBot.USERSELECTEDSPORTNAME(type) == TEXT:
+						return f" • Ваш спорт: {SPORT_DATA_ID['EMODJI_SPORT']} <b>{SPORT_DATA_ID['NAME_SPORT'][2:]}</b>\n\n"
+			
+			elif not USER_SPORT:
+				return ""
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -587,12 +683,57 @@ class ConfigBot:
 				"""Ограничиваем вывод сообщения до 50 символов и добавляем многоточие в конце."""
 				TRUNCATED_MESSAGE = MESSAGE_SPORT[:55] + "..." if len(MESSAGE_SPORT) > 55 else MESSAGE_SPORT
 
-				ID_SPORT_LIST.append(f" • <code>{ID_SPORT}</code>: {NAME_SPORT } — «{TRUNCATED_MESSAGE}»")
+				ID_SPORT_LIST.append(f" • <code>{ID_SPORT}</code>: {NAME_SPORT[2:] } — «{TRUNCATED_MESSAGE[2:]}»")
 
 			if ID_SPORT_LIST:
 				return "\n\n".join(ID_SPORT_LIST)
 			else:
 				return " • В данный момент нету упражнений."
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETWORKOUT(cls, sport_data, types) -> str:
+		"""Выводим данные об тренировках из базы данных."""
+		try:
+			WORKOUT_LIST = []
+
+			for ID_SPORT, SPORT_DATA_ID in sport_data.items():
+				if ConfigBot.USERSELECTEDSPORTNAME(types) == SPORT_DATA_ID["CALLBACK_DATA_SPORT"]:
+					if "WORKOUTS" in SPORT_DATA_ID:
+						for WORKOUT_ID, WORKOUT_DATA_ID in SPORT_DATA_ID["WORKOUTS"].items():
+							EMODJI_WORKOUT = WORKOUT_DATA_ID["EMODJI_WORKOUT"]
+							NAME_WORKOUT = WORKOUT_DATA_ID["NAME_WORKOUT"]
+							TERN_WORKOUT = WORKOUT_DATA_ID["TERN_WORKOUT"]
+
+							WORKOUT_LIST.append(f"     <b>↳</b>{EMODJI_WORKOUT} <b>{NAME_WORKOUT}</b> — {TERN_WORKOUT}")
+
+			if WORKOUT_LIST:
+				return "\n".join(WORKOUT_LIST)
+			else:
+				return "     <b>↳</b> В данный момент нету тренировок."
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GETIDWORKOUTS(cls, sport_data) -> str:
+		"""Выводим данные об тренировках из базы данных."""
+		try:
+			ID_WORKOUT_LIST = []
+
+			for ID_SPORT, SPORT_DATA_ID in sport_data.items():
+				if "WORKOUTS" in SPORT_DATA_ID:
+					for WORKOUT_ID, WORKOUT_DATA_ID in SPORT_DATA_ID["WORKOUTS"].items():
+						NAME_WORKOUT = WORKOUT_DATA_ID["NAME_WORKOUT"]
+						TERN_WORKOUT = WORKOUT_DATA_ID["TERN_WORKOUT"]
+
+						ID_WORKOUT_LIST.append(f" • <code>{WORKOUT_ID}</code>: {NAME_WORKOUT} — {TERN_WORKOUT}")
+			
+			if ID_WORKOUT_LIST:
+				return "\n".join(ID_WORKOUT_LIST)
+			else:
+				return " • В данный момент нету тренировок."
+		
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -609,7 +750,7 @@ class ConfigBot:
 				ID_UPDATE_LIST.append(f" • <code>{ID_UPDATE}</code>: {NAME_UPDATE} — <a href='{SITE_UPDATE}'>Ссылка на описание обновления</a>;")
 			
 			if ID_UPDATE_LIST:
-				return "\n".join(ID_UPDATE_LIST)
+				return "\n\n".join(ID_UPDATE_LIST)
 			else:
 				return " • В данный момент нету обновлений."
 		except Exception as e:
@@ -644,9 +785,9 @@ class ConfigBot:
 		"""Функция для перевода текста на английский язык с использованием внешнего сервиса"""
 		try:
 			translator = Translator()
-			translation = translator.translate(text, dest='en')
+			translation = translator.translate(text, dest='en').text
 
-			return translation.text
+			return translation
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -772,6 +913,9 @@ class ConfigBotAsync:
 
 				if NOTIFY_ADMINS:	
 					await bot.send_message(chat_id = int(USER_ID), text = f"🔔 • {ConfigBot.GETCURRENTHOUR()}, <a href='{USER_NAME}'>{USER_LAST_NAME}</a>, бот запущен в <b><i>{ConfigBot.GETTIMENOW()}</i></b>")
+				
+				elif not NOTIFY_ADMINS:
+					pass
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 	
@@ -791,5 +935,17 @@ class ConfigBotAsync:
 					await bot.send_message(chat_id = int(USER_ID), text = f"💬 <a href='{USER_NAME}'>{USER_LAST_NAME}</a>! Рады сообщить, что вышла <b>новая версия - v{env_version}</b> нашего бота с улучшениями и новыми возможностями.\n\n"
 																		f"❕ Для получения всех новинок и обновлений, пожалуйста, воспользуйтесь командой <b><code>/update</code></b>.\n\n"
 																		f"Спасибо за ваше внимание и активное использование нашего бота! 🤍")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	async def RELOAD_HANDLERS_FOR_UPDATE(cls, database_update = None, handler = None) -> None:
+		"""Асинхронная функция обновления хандлеров для выпущенных новых обновлений."""
+		try:
+			from data.loader import dp
+
+			for ID_UPDATE, UPDATE_DATA_ID in [(ID, DATA_ID) for ID, DATA_ID in database_update.items() if ID is not None]:
+				dp.register_message_handler(handler, lambda message, text=f"{UPDATE_DATA_ID['EMODJI_UPDATE']} • {UPDATE_DATA_ID['NAME_UPDATE']}": message.text == text)
+				
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)

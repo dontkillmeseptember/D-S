@@ -28,6 +28,8 @@ class ProfileState(StatesGroup):
 	SendNumberWalletState = State()
 	"""Фаза для обратного возвращения в профиль или продолжение вводить номер кошелька."""
 	SendNumberWalletAndBackProfileState = State()
+	"""Фаза для выбора нового упражнения пользователя."""
+	SelectedNewSportState = State()
 	
 """Создаем StatesGroup для обработчика команды !debug_admin"""
 class DebugAdminState(StatesGroup):
@@ -57,10 +59,28 @@ class DebugAdminState(StatesGroup):
 	AddUpdateForAdminState = State()
 	"""Фаза для ввода ID обновления, чтобы удалить его из базы данных."""
 	DeleteUpdateForAdminState = State()
+	"""Фаза для ввода ID обновления, чтобы начать его редактировать из базы данных."""
+	EditUpdateForAdminState = State()
+	"""Фаза для ввода нового описания обновления."""
+	EditDescriptionUpdateForAdminState = State()
+	"""Фаза для ввода новый ссылки на описание обновления."""
+	EditLinkUpdateForAdminState = State()
+	"""Фаза для ввода нового эмодзи для обновления."""
+	EditEmojiUpdateForAdminState = State()
+	"""Фаза для ввода нового названия обновления."""
+	EditNameUpdateForAdminState = State()
 	"""Фаза для ввода информации об управлении бота."""
 	AddSportForAdminState = State()
 	"""Фаза для ввода ID упражнения, чтобы удалить его из базы данных."""
 	DeleteSportForAdminState = State()
+	"""Фаза для ввода ID упражнения, чтобы начать его редактировать из базы данных."""
+	EditSportForAdminState = State()
+	"""Фаза для ввода нового описания упражнения."""
+	EditDescriptionSportForAdminState = State()
+	"""Фаза для ввода новых тренировок в упражнение."""
+	AddWorkoutForAdminState = State()
+	"""Фаза для удаление тренировки в упражнение."""
+	DeleteWorkoutForAdminState = State()
 
 """Создаем StatesGroup для обработчика вкладки "Корзина Товаров" для пользователей"""
 class MarketState(StatesGroup):

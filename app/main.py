@@ -1,7 +1,7 @@
 from server.fastapi_app import keep_alive
 
 from data.loader import dp, Create_JSON_file
-from data.loader_handler import Loader_Handlers, Loader_Admin_Handlers, Loader_Register_Handlers
+from data.loader_handler import Loader_Handlers, Loader_Admin_Handlers, Loader_Register_Handlers, Loader_DebugMenu_Handlers
 from data.config import ConfigBot, ConfigBotAsync
 
 from database.requests.version_db import get_bot_version, load_version_data, save_version_bot_data
@@ -19,7 +19,8 @@ async def start_bot() -> None:
 		await asyncio.gather(
 			Create_JSON_file(),
 			Loader_Handlers(),
-			Loader_Admin_Handlers()
+			Loader_Admin_Handlers(),
+			Loader_DebugMenu_Handlers()
 		)
 	except Exception as e:
 		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
@@ -38,7 +39,7 @@ async def on_startup() -> str:
 		"""Вызываем нужные функции для отправки уведомлений и загрузка хандлеров."""
 		await asyncio.gather(
 			ConfigBotAsync.NOTIFY_ADMINS(database_users = USER_DATA_DB),
-			Loader_Register_Handlers(),
+			Loader_Register_Handlers()
 		)
 
 		if ENV_VERSION_BOT != VERSION_BOT:

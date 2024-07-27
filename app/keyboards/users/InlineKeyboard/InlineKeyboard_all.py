@@ -24,28 +24,43 @@ def create_recovery_inlinekeyboard() -> create_user_inline_keyboard:
 
 	return create_user_inline_keyboard(recovery_inline_keyboard)
 
+"""Создаем Inline клавиатуру для пропуска фазы с вводом нации пользователя."""
+def skip_phase_nation_inlinekeyboard() -> create_user_inline_keyboard:
+	skip_phase_nation_inline_keyboard = [[(ConfigInlineKeyboard().SKIP_PHASE_NATION, "SKIP_PHASE_NATION")]]
+
+	return create_user_inline_keyboard(skip_phase_nation_inline_keyboard)
+
 """Создаем inline клавиатуру для вкладки "Ваш профиль" для пользователей."""
 def create_profilemenu_inlinekeyboard(message) -> create_user_inline_keyboard:
-	"""Объявляем переменную с выводом информации о верификации пользователя."""
+	"""Объявляем переменную с выводом информации о верификации пользователя и выбрал ли пользователей спорт или нет."""
 	USER_VERIFICATION = ConfigBot.USERVERIFY(message)
+	USER_SPORT = ConfigBot.USERSELECTEDSPORT(message)
 
-	if USER_VERIFICATION is None or USER_VERIFICATION is False:
-		profile_menu_inline_keyboard = [
+	profile_menu_button_configs = {
+		(None, False): [
 			[(ConfigInlineKeyboard().VERIFY_ACCOUNT, "VERIFY_ACCOUNT")],
 			[(ConfigInlineKeyboard().DELETE_ACCOUNT, "DELETE_ACCOUNT")]
-		]
-	
-	elif USER_VERIFICATION:
-		profile_menu_inline_keyboard = [
+		],
+		(True, True): [
+			[
+				(ConfigInlineKeyboard().RSB_BANK, "RSB_BANK"),
+				(ConfigInlineKeyboard().NOTIFY_USER, "NOTIFY")	
+			],
+			[
+				(ConfigInlineKeyboard().CHANGE_SPORT_USERS, "CHANGE_SPORT_USERS")
+			],
+			[(ConfigInlineKeyboard().DELETE_ACCOUNT, "DELETE_ACCOUNT")]
+		],
+		(True, False): [
 			[
 				(ConfigInlineKeyboard().RSB_BANK, "RSB_BANK"),
 				(ConfigInlineKeyboard().NOTIFY_USER, "NOTIFY")
 			],
 			[(ConfigInlineKeyboard().DELETE_ACCOUNT, "DELETE_ACCOUNT")]
 		]
-	
-	else:
-		logger.warning("⚠️ USER_VERIFICATION не ровняется True или False")
+	}
+
+	profile_menu_inline_keyboard = profile_menu_button_configs.get((USER_VERIFICATION, USER_SPORT), [])
 	
 	return create_user_inline_keyboard(profile_menu_inline_keyboard)
 
@@ -82,6 +97,17 @@ def create_notify_inlinekeyboard(message) -> create_user_inline_keyboard:
 		logger.error("⚠️ Произошла непредвиденная ошибка с проверкой, существует пользователь в базе данных администрации: %s", is_admin_in_data(USER_ID, ADMIN_DATA_DB))
 
 	return create_user_inline_keyboard(notify_menu_inline_keyboard, row_width = 2)
+
+"""Создаем Inline клавиатуру для вкладки "Изменить Упражнение" для пользователей."""
+def create_change_sport_inlinekeyboard(message) -> create_user_inline_keyboard:
+	"""Объявляем переменную с выводом информации об администрации и о пользователе: SPORT_DATA_DB."""
+	SPORT_DATA_DB = load_sport_data()
+
+	"""Выполняем цикл для вывода информации о кнопках, которые пользователь еще не выбрал."""
+	change_sport_inline_keyboard = [[sport_data['NAME_SPORT'], sport_data['CALLBACK_DATA_SPORT']] for sport_data in SPORT_DATA_DB.values() if ConfigBot.USERSELECTEDSPORTNAME(message) != sport_data['CALLBACK_DATA_SPORT']]
+	change_sport_inline_keyboard = [change_sport_inline_keyboard[i:i + 2] for i in range(0, len(change_sport_inline_keyboard), 2)] + [[(ConfigInlineKeyboard().BACK, "BACK_PROFILE")]]
+
+	return create_user_inline_keyboard(change_sport_inline_keyboard)
 
 """Создаем Inline клавиатуру для вкладки "Кодекс Силы" для пользователей"""
 def create_sport_menu_inlinekeyboard() -> create_user_inline_keyboard:
