@@ -3,9 +3,12 @@ from handlers.users.main_menu.main_menu_func import main_menu_handler
 from handlers.users.main_menu.battlepass.run_battlepass_func import battlepass_handler
 from handlers.users.main_menu.update.update_func import update_command
 from handlers.users.main_menu.update.info_update_func import info_update_handler, update_tabs_handler
+
 from handlers.users.main_menu.world_dinara.world_dinara_func import world_dinara_handler
 from handlers.users.main_menu.world_dinara.market_func import market_handler
 from handlers.users.main_menu.world_dinara.sport_func import sport_handler
+from handlers.users.main_menu.world_dinara.ration_func import Ration_Handler
+from handlers.users.main_menu.world_dinara.memory_diary_func import Memory_Diary_Handler
 
 from handlers.users.main_menu.user_profile.profile_func import profile_handler
 from handlers.users.main_menu.user_profile.profile_sport_func import change_sport_users_handler
@@ -17,6 +20,7 @@ from handlers.users.main_menu.user_profile.profile_verify_func import verify_han
 from handlers.admins.loggin_admin_func import loggin_admin_command
 from handlers.admins.help_admin_func import help_admin_command
 
+"""Загружаем команды для админов."""
 from handlers.admins.debugmenu.debug_menu_func import debug_admin_command
 from handlers.admins.debugmenu.debug_menu_sport import sport_admin_handler
 from handlers.admins.debugmenu.debug_menu_update import update_admin_handler
@@ -52,6 +56,10 @@ class LoaderHandlers():
 	BATTLEPASS_HANDLER: battlepass_handler
 	"""Загружает обработчик для Кодекса Силы."""
 	SPORT_HANDLER: sport_handler
+	"""Загружаем обработчик для Рациона."""
+	RATION_HANDLER: Ration_Handler
+	"""Загружаем обработчик для Дневника Памяти."""
+	MEMORY_DAYS_HANDLER: Memory_Diary_Handler
 
 @dataclass
 class LoaderAdminHandlers():

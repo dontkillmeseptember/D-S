@@ -1,5 +1,5 @@
 from data.loader import dp
-from data.config import ConfigBot
+from data.config import ConfigBot, ConfigBotAsync
 from data.config_Keyboard import ConfigReplyKeyboard
 from data.loader_keyboard import LoaderReplyKeyboards
 
@@ -17,14 +17,20 @@ async def main_menu_handler(message: types.Message) -> None:
 
 	try:
 		"""Объявляем переменную с выводом текущей версии пользователя."""
+		# USER_ID = ConfigBot.USERID(message)
 		USER_VERSION_BOT = ConfigBot.USERVERSIONBOT(message)
+		# MESSAGE_ID = ConfigBot.GETMESSAGEID(message)
 
 		if USER_VERSION_BOT == VERSION_BOT:
 			"""Объявляем переменные о выводе клавиатуры для возвращения в главное меню."""
 			main_menu_reply_keyboard = LoaderReplyKeyboards(message).KEYBOARDS_MENU
 
 			if message.text == ConfigReplyKeyboard().MAINMENU:
+				# await ConfigBotAsync.DELETE_MESSAGE_USERS_AND_ADMINS(types = message, message_id = MESSAGE_ID)
+
 				await message.answer(f"💬 Добро пожаловать в раздел <b>«{ConfigReplyKeyboard().MAINMENU[4:]}»</b>.\n\n", reply_markup = main_menu_reply_keyboard)
+
+				# await ConfigBotAsync.SAVE_MESSAGE_ID(user_id = USER_ID, send_message = SEND_MESSAGE)
 			
 			elif message.text == ConfigReplyKeyboard().FINISH_DOWNLOAD:
 				for VERSION, UPDATE_DATA_ID in UPDATE_DATA_DB.items():

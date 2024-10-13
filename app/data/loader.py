@@ -6,6 +6,7 @@ from database.requests.rsb_db import create_rsb_file
 from database.requests.info_update_db import create_update_file
 from database.requests.sport_db import create_sport_file
 from database.requests.ration_db import create_ration_file
+from database.requests.memory_diary_db import Create_Memory_Diary_File
 
 from misc.libraries import dataclass, Bot, Dispatcher, MemoryStorage, os, load_dotenv
 from misc.loggers import logger
@@ -51,6 +52,8 @@ class CreateJSON:
 	CREATE_SPORT = create_sport_file("sport_data.json")
 	"""Создание JSON Файла для сохранения данных об рационе."""
 	CREATE_RATION = create_ration_file("ration_data.json")
+	"""Создание JSON Файла для хранение данных об сообщениях в дневнике памяти."""
+	CREATE_MEMORY_DIARY = Create_Memory_Diary_File("memory_diary_data.json")
 
 """Функция создания файлов JSON"""
 def Create_JSON_file() -> CreateJSON:

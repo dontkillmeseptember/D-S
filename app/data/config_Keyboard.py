@@ -90,7 +90,18 @@ class ConfigInlineKeyboard:
 	RATION: str = "• Управление Рационом •"
 	ADD_RATION: str = "• Добавить Рацион"
 	DELETE_RATION: str = "Удалить Рацион •"
+	SELECT_RATION: str = "• Выбрать Основной Рацион •"
 	EDIT_RATION: str = "• Редактировать Рацион •"
+
+	"""Название кнопок для раздела "Редактировать Рацион" для администрации."""
+	EDIT_NAME_RATION: str = "• Изменить Название"
+	EDIT_EMOJI_RATION: str = "Изменить Эмодзи •"
+	EDIT_WEEKDAY_RATION: str = "• Редактировать День Недели •"
+
+	"""Название кнопок для раздела "Редактировать День Недели" для администрации."""
+	EDIT_WEEKDAY_DESCRIPTION: str = "• Изменить Описание"
+	EDIT_WEEKDAY_DELETE_MEALS: str = "Удалить Питание •"
+	EDIT_WEEKDAY_MEALS: str = "• Добавить Питание •"
 
 	"""Название кнопки для возвращения назад/вперед"""
 	BACK: str = "← Назад"

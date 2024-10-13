@@ -12,9 +12,10 @@ from database.requests.sport_db import load_sport_data
 from misc.loggers import logger
 from misc.libraries import types, FSMContext, Union
 
-@dp.message_handler(lambda message: message.text == ConfigRoleUsers().USER + ConfigReplyKeyboard().PROFILE or
-									message.text == ConfigRoleUsers().ADMIN + ConfigReplyKeyboard().PROFILE or
-									message.text == ConfigRoleUsers().USER_NEW + ConfigReplyKeyboard().PROFILE)
+# @dp.message_handler(lambda message: message.text == ConfigRoleUsers().USER + ConfigReplyKeyboard().PROFILE or
+# 									message.text == ConfigRoleUsers().ADMIN + ConfigReplyKeyboard().PROFILE or
+# 									message.text == ConfigRoleUsers().USER_NEW + ConfigReplyKeyboard().PROFILE)
+@dp.message_handler(lambda message: message.text in [ConfigRoleUsers().USER + ConfigReplyKeyboard().PROFILE, ConfigRoleUsers().ADMIN + ConfigReplyKeyboard().PROFILE, ConfigRoleUsers().USER_NEW + ConfigReplyKeyboard().PROFILE])
 @dp.callback_query_handler(lambda callback_data: callback_data.data == "BACK_PROFILE", state = [ProfileState.SendCodeAndSocialState, ProfileState.SendUserPasswordState, ProfileState.SendNumberWalletState, ProfileState.SendNumberWalletAndBackProfileState, ProfileState.SelectedNewSportState, None])
 async def profile_handler(message_or_callbackQuery: Union[types.Message, types.CallbackQuery], state: FSMContext) -> None:
 	"""Объявляем переменные с выводом данных о пользователе, выбранном упражнение, версии бота."""
@@ -70,10 +71,14 @@ async def profile_handler(message_or_callbackQuery: Union[types.Message, types.C
 
 						USER_DATA_DB[str(USER_ID)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = SENT_MESSAGE.message_id
 
+						save_user_data(USER_DATA_DB)
+
 					elif not PHOTO.photos:
 						SENT_MESSAGE = await message_or_callbackQuery.answer(INFO_PROFILE_MESSAGE, reply_markup = profile_menu_inline_keyboard)
 
 						USER_DATA_DB[str(USER_ID)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = SENT_MESSAGE.message_id
+
+						save_user_data(USER_DATA_DB)
 					
 					else:
 						await message_or_callbackQuery.answer("⚠️ В данный момент профиль не работает.")
@@ -90,12 +95,16 @@ async def profile_handler(message_or_callbackQuery: Union[types.Message, types.C
 
 							USER_DATA_DB[str(USER_ID)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = SENT_MESSAGE.message_id
 
+							save_user_data(USER_DATA_DB)
+
 							await state.finish()
 
 						elif not PHOTO.photos:
 							SENT_MESSAGE = await bot.send_message(chat_id = message_or_callbackQuery.message.chat.id, text = INFO_PROFILE_MESSAGE, reply_markup = profile_menu_inline_keyboard)
 
 							USER_DATA_DB[str(USER_ID)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = SENT_MESSAGE.message_id
+
+							save_user_data(USER_DATA_DB)
 
 							await state.finish()
 

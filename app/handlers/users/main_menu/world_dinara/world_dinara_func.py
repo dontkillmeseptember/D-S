@@ -1,5 +1,5 @@
 from data.loader import dp
-from data.config import ConfigBot
+from data.config import ConfigBot, ConfigBotAsync
 from data.config_Keyboard import ConfigReplyKeyboard
 from data.loader_keyboard import LoaderReplyKeyboards
 
@@ -16,8 +16,11 @@ async def world_dinara_handler(message: types.Message) -> None:
 	try:
 		"""Объявляем переменную с выводом текущей версии пользователя"""
 		USER_VERSION_BOT = ConfigBot.USERVERSIONBOT(message)
+		# MESSAGE_ID = ConfigBot.GETMESSAGEID(message)
 
 		if USER_VERSION_BOT == VERSION_BOT:
+			# await ConfigBotAsync.DELETE_MESSAGE_USERS_AND_ADMINS(types = message, message_id = MESSAGE_ID)
+
 			"""Объявляем переменные о выводе клавиатуры для возвращения в главное меню вкладки Мир Динары"""
 			world_menu_reply_keyboard = LoaderReplyKeyboards(message).KEYBOARDS_WORLD_MENU
 			

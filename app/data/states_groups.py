@@ -81,6 +81,26 @@ class DebugAdminState(StatesGroup):
 	AddWorkoutForAdminState = State()
 	"""Фаза для удаление тренировки в упражнение."""
 	DeleteWorkoutForAdminState = State()
+	"""Фаза для добавления нового рациона в базу данных."""
+	AddRationForAdminState = State()
+	"""Фаза для удаления рациона из базы данных."""
+	DeleteRationForAdminState = State()
+	"""Фаза для редактирования рациона в базе данных."""
+	EditRationForAdminState = State()
+	"""Фаза для редактирования названия рациона в базе данных."""
+	NewNameRationForAdminState = State()
+	"""Фаза для редактирования эмодзи рациона в базе данных."""
+	NewEmojiRationForAdminState = State()
+	"""Фаза для редактирования дня дня рациона в базе данных."""
+	EditWeekdayRationForAdminState = State()
+	"""Фаза для редактирования описания дня недели рациона в базе данных."""
+	NewDescriptionWeekdayRationForAdminState = State()
+	"""Фаза для добавления нового блюда в базу данных."""
+	NewMealsWeekdayRationForAdminState = State()
+	"""Фаза для удаления блюда из базы данных."""
+	DeleteMealsRationForAdminState = State()
+	"""Фаза для выбора рациона для пользователя."""
+	SelectRationForAdminState = State()
 
 """Создаем StatesGroup для обработчика вкладки "Корзина Товаров" для пользователей"""
 class MarketState(StatesGroup):

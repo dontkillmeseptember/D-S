@@ -1,3 +1,5 @@
+from data.config_Keyboard import ConfigReplyKeyboard
+
 from misc.libraries import (
 	dataclass,
 	os,
@@ -9,17 +11,20 @@ from misc.libraries import (
 	random,
 	re,
 	asyncio,
-	Union
+	Union,
+	calendar
 )
 
 from misc.loggers import logger
 
-from database.requests.user_db import check_user_data, load_user_data
+from database.requests.user_db import check_user_data, load_user_data, save_user_data
 from database.requests.market_db import check_market_data
 from database.requests.admin_db import load_admin_data, is_admin_in_data
 from database.requests.rsb_db import check_rsb_data, is_rsb_in_data, load_rsb_data
 from database.requests.sport_db import check_sport_data
 from database.requests.info_update_db import check_update_data
+from database.requests.ration_db import check_ration_data
+from database.requests.memory_diary_db import Check_Memory_Diary_Data
 
 from data.configBaseModel import User
 
@@ -210,6 +215,43 @@ class ConfigBot:
 				return check_user_data_db.get("STATES_USER", {}).get("SPORT_ID")
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def RATION_SELECT_USERS(cls) -> str:
+		"""Выводим данные пользователя - RATION_SELECT для Пользователей."""
+		try:
+			"""Получаем доступ к базе данных о пользователе."""
+			check_ration_data_db = check_ration_data("RATION_MAIN")
+			"""Выводим информацию о RATION_SELECT пользователя."""
+			return check_ration_data_db.get("RATION_SELECT")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def STATUS_USER_RATION_ID(cls, obj) -> str:
+		"""Выводим данных пользователя - STATUS_RATION Пользователя."""
+		try:
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе."""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о STATUS_RATION пользователя."""
+				return check_user_data_db.get("STATES_USER", {}).get("RATION_ID")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def STATUS_USER_WEEKDAY_ID(cls, obj) -> str:
+		"""Выводим данных пользователя - STATUS_WEEKDAY Пользователя."""
+		try:
+			if isinstance(obj, (types.Message, types.CallbackQuery)):
+				"""Получаем доступ к базе данных о пользователе."""
+				USER_ID = ConfigBot.USERID(obj)
+				check_user_data_db = check_user_data(USER_ID)
+				"""Выводим информацию о STATUS_WEEKDAY пользователя."""
+				return check_user_data_db.get("STATES_USER", {}).get("WEEKDAY_ID")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
 	def USERSTATUSVERIFY(cls, obj) -> str:
@@ -357,6 +399,15 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
 	@classmethod
+	def GET_MEMORY_DIARY(cls, memory_diary_id) -> str:
+		try:
+			CHECK_MEMORY_DIARY_DB = Check_Memory_Diary_Data(memory_diary_id)
+
+			return CHECK_MEMORY_DIARY_DB.get("MESSAGE")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
 	def GETUPDATE(cls, update_id, obj) -> str:
 		"""Выводим информацию об обновлении."""
 		try:
@@ -364,6 +415,34 @@ class ConfigBot:
 
 			if obj in ("NAME_UPDATE", "MESSAGE_UPDATE", "DATA_UPDATE", "URL_UPDATE"):
 				return check_update_data_db.get(obj)
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GET_RATION(cls, ration_id, obj, weekday_user = None) -> str:
+		"""Выводим информацию о Рационе."""
+		try:
+			check_ration_data_db = check_ration_data(ration_id)
+
+			if obj in ("NAME_RATION", "EMOJI_RATION", "CREATE_TIME_RATION"):
+				return check_ration_data_db.get(obj)
+			
+			if obj in ("DESCRIPTION_RATION"):
+				return check_ration_data_db.get("WEEKDAY", {}).get(f"{weekday_user}").get(f"DESCRIPTION_{weekday_user}")
+			
+			if obj in ("BREAKFAST", "BREAKFAST_LINK_RECIPE", "LUNCH", "LUNCH_LINK_RECIPE", "DINNER", "DINNER_LINK_RECIPE"):
+				return check_ration_data_db.get("WEEKDAY", {}).get(f"{weekday_user}").get(obj)
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GET_WEEKDAY(cls, ration_id, weekday_id, obj) -> str:
+		"""Выводим информацию о дне Недели."""
+		try:
+			check_ration_data_db = check_ration_data(ration_id)
+
+			if obj in (f"DESCRIPTION_{weekday_id}"):
+				return check_ration_data_db.get("WEEKDAY", {}).get(weekday_id, {}).get(obj)
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -671,6 +750,140 @@ class ConfigBot:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 	
 	@classmethod
+	def GET_ID_RATION(cls, ration_data) -> str:
+		"""Выводим данные о рационах из базы данных."""
+		try:
+			ID_RATION_LIST = []
+
+			for ID_RATION, RATION_DATA_ID in ration_data.items():
+				if ID_RATION == "RATION_MAIN":
+					continue
+
+				NAME_RATION = RATION_DATA_ID["NAME_RATION"]
+				EMOJI_RATION = RATION_DATA_ID["EMOJI_RATION"]
+
+				ID_RATION_LIST.append(f" • [ <code>{ID_RATION}</code> ]: {NAME_RATION} • {EMOJI_RATION}")
+
+			if ID_RATION_LIST:
+				return "\n\n".join(ID_RATION_LIST)
+			else:
+				return " • В данный момент нету рационов."
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def GET_MEALS_WEEKDAY(cls, ration_data, ration_id, weekday_id) -> str:
+		"""Выводим данные о блюдах из базы данных."""
+		try:
+			MEALS_LIST = []
+
+			for ID_RATION, RATION_DATA_ID in ration_data.items():
+				if ID_RATION == ration_id:
+					if "WEEKDAY" in RATION_DATA_ID:
+						for ID_WEEKDAY, WEEKDAY_DATA_ID in RATION_DATA_ID["WEEKDAY"].items():
+							if ID_WEEKDAY == weekday_id:
+								BREAKFAST = WEEKDAY_DATA_ID["BREAKFAST"]
+								BREAKFAST_LINK = WEEKDAY_DATA_ID["BREAKFAST_LINK_RECIPE"]
+								LUNCH = WEEKDAY_DATA_ID["LUNCH"]
+								LUNCH_LINK = WEEKDAY_DATA_ID["LUNCH_LINK_RECIPE"]
+								DINNER = WEEKDAY_DATA_ID["DINNER"]
+								DINNER_LINK = WEEKDAY_DATA_ID["DINNER_LINK_RECIPE"]
+
+								MEALS_LIST.append(f" • [ <code>BREAKFAST</code> ]: <a href='{BREAKFAST_LINK}'>{BREAKFAST if BREAKFAST is not None else 'В данный момент нету блюд.'}</a>")
+								MEALS_LIST.append(f" • [ <code>LUNCH</code> ]: <a href='{LUNCH_LINK}'>{LUNCH if LUNCH is not None else 'В данный момент нету блюд.'}</a>")
+								MEALS_LIST.append(f" • [ <code>DINNER</code> ]: <a href='{DINNER_LINK}'>{DINNER if DINNER is not None else 'В данный момент нету блюд.'}</a>")
+
+			if MEALS_LIST:
+				return "\n\n".join(MEALS_LIST)
+			else:
+				return " • В данный момент нету блюд."
+		
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def TRANSTALED_WEEKDAY(cls, weekday_id) -> str:
+		"""Переводим недели на русском языке."""
+		try:
+			WEEKDAYS_TRANSLATION_RUSSIAN = {
+				"MONDAY": "Понедельника",
+				"TUESDAY": "Вторника",
+				"WEDNESDAY": "Среды",
+				"THURSDAY": "Четверга",
+				"FRIDAY": "Пятницы",
+				"SATURDAY": "Субботы",
+				"SUNDAY": "Воскресенья"
+			}
+
+			return WEEKDAYS_TRANSLATION_RUSSIAN.get(weekday_id, "")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def LENS_WEEKDAY(cls, ration_data, weekday_id, types) -> int:
+		"""Выводим данные о днях недели из базы данных."""
+		try:
+			ID_WEEKDAY_LIST = []
+
+			for ID_RATION, RATION_DATA_ID in ration_data.items():
+				if ConfigBot.STATUS_USER_RATION_ID(types) == ID_RATION:
+					if "WEEKDAY" in RATION_DATA_ID:
+						for ID_WEEKDAY, WEEKDAY_DATA_ID in RATION_DATA_ID["WEEKDAY"].items():
+							if weekday_id == ID_WEEKDAY:
+								RATION_BREAKFAST = WEEKDAY_DATA_ID["BREAKFAST"]
+								RATION_LUNCH = WEEKDAY_DATA_ID["LUNCH"]
+								RATION_DINNER = WEEKDAY_DATA_ID["DINNER"]
+
+								COUNT_NON_NULL_MEALS = sum(meal is not None for meal in [RATION_BREAKFAST, RATION_LUNCH, RATION_DINNER])
+
+								ID_WEEKDAY_LIST.append(str(COUNT_NON_NULL_MEALS))
+			
+			return " ".join(ID_WEEKDAY_LIST)
+
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	def GET_ID_WEEKDAY(cls, ration_data, types) -> str:
+		"""Выводим данные о днях недели из базы данных."""
+		try:
+			ID_WEEKDAY_LIST = []
+
+			WEEKDAYS_TRANSLATION_RUSSIAN = {
+				"MONDAY": "Понедельник",
+				"TUESDAY": "Вторник",
+				"WEDNESDAY": "Среда",
+				"THURSDAY": "Четверг",
+				"FRIDAY": "Пятница",
+				"SATURDAY": "Суббота",
+				"SUNDAY": "Воскресенье"
+			}
+
+			for ID_RATION, RATION_DATA_ID in ration_data.items():
+				if ConfigBot.STATUS_USER_RATION_ID(types) == ID_RATION:
+					if "WEEKDAY" in RATION_DATA_ID:
+						for ID_WEEKDAY, WEEKDAY_DATA_ID in RATION_DATA_ID["WEEKDAY"].items():
+							RATION_BREAKFAST = WEEKDAY_DATA_ID["BREAKFAST"]
+							RATION_LUNCH = WEEKDAY_DATA_ID["LUNCH"]
+							RATION_DINNER = WEEKDAY_DATA_ID["DINNER"]
+
+							COUNT_NON_NULL_MEALS = sum(meal is not None for meal in [RATION_BREAKFAST, RATION_LUNCH, RATION_DINNER])
+
+							TRANSLATION_WEEKDAY = WEEKDAYS_TRANSLATION_RUSSIAN.get(ID_WEEKDAY, "")
+							ID_WEEKDAY_LIST.append(
+								f" • [ <code>{ID_WEEKDAY}</code> ]: {TRANSLATION_WEEKDAY} • {f'<b>{COUNT_NON_NULL_MEALS}</b> — ' if COUNT_NON_NULL_MEALS > 0 else 'Нету блюд'}"
+								f"{f'<i>«{RATION_BREAKFAST}»</i>, ' if RATION_BREAKFAST is not None else ''}"
+								f"{f'<i>«{RATION_LUNCH}»</i>, ' if RATION_LUNCH is not None else ''}"
+								f"{f'<i>«{RATION_DINNER}»</i>' if RATION_DINNER is not None else ''}"
+							)
+
+			if ID_WEEKDAY_LIST:
+				return "\n\n".join(ID_WEEKDAY_LIST)
+
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
 	def GETIDSPORT(cls, sport_data) -> str:
 		"""Выводим данные об упражнениях из базы данных."""
 		try:
@@ -777,6 +990,36 @@ class ConfigBot:
 				return "Добрый вечер"
 			else:
 				return "Доброй ночи"
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def GET_CURRENT_DAY(cls) -> str:
+		"""Объявляем переменные для определенного текущего дня пользователя."""
+		try:
+			current_date = datetime.datetime.now()
+			day_of_week = current_date.weekday()
+			return calendar.day_name[day_of_week].upper()
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	def GET_USER_DAY_YEAR_MONTH(cls, obj) -> str:
+		"""Объявляем переменные для определенного текущего дня пользователя."""
+		try:
+			CURRENT_DATE = datetime.datetime.now()
+			
+			if obj == "day":
+				return CURRENT_DATE.day
+			
+			elif obj == "year":
+				return CURRENT_DATE.year
+			
+			elif obj == "month":
+				return CURRENT_DATE.month
+			
+			else:
+				return None
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 	
@@ -939,6 +1182,20 @@ class ConfigBotAsync:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 	
 	@classmethod
+	async def NOTIFY_SELECT_RATION(cls, types = None, database_users = None, database_admins = None, name_ration = None) -> None:
+		"""Асинхронная функция для отправки сообщения о выборе рациона."""
+		try:
+			from data.loader import bot
+
+			for USER_DATA_ID in database_users:
+				if USER_DATA_ID != ConfigBot(types).USERID and USER_DATA_ID not in database_admins:
+					await bot.send_message(int(USER_DATA_ID), text = f"🔔 <a href='{ConfigBot.USERNAMEBOT(int(USER_DATA_ID))}'>{ConfigBot.USERLASTNAMEBOT(int(USER_DATA_ID))}</a>, мы рады сообщить вам, что администратор выбрал Рацион.\n\n"
+							                                         f" • <b>Название Рациона:</b> [ <i>{name_ration}</i> ]\n\n"
+																	 f"Для просмотра подробностей рациона, зайдите во вкладку <i><b>«{ConfigReplyKeyboard().RATION[4:]}»</b></i>.")
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
 	async def RELOAD_HANDLERS_FOR_UPDATE(cls, database_update = None, handler = None) -> None:
 		"""Асинхронная функция обновления хандлеров для выпущенных новых обновлений."""
 		try:
@@ -947,5 +1204,32 @@ class ConfigBotAsync:
 			for ID_UPDATE, UPDATE_DATA_ID in [(ID, DATA_ID) for ID, DATA_ID in database_update.items() if ID is not None]:
 				dp.register_message_handler(handler, lambda message, text=f"{UPDATE_DATA_ID['EMODJI_UPDATE']} • {UPDATE_DATA_ID['NAME_UPDATE']}": message.text == text)
 				
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+
+	@classmethod
+	async def DELETE_MESSAGE_USERS_AND_ADMINS(cls, types = None, message_id = None) -> None:
+		"""Асинхронная функция для удаления сообщений пользователей или админам."""
+		try:
+			from data.loader import bot
+
+			if isinstance(message_id, int):
+				await bot.delete_message(types.chat.id, message_id)
+				await types.delete()
+			
+			elif message_id is None:
+				return message_id
+		except Exception as e:
+			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
+	
+	@classmethod
+	async def SAVE_MESSAGE_ID(cls, user_id = None, send_message = None) -> None:
+		"""Асинхронная функция для сохранения ID отправленного сообщения."""
+		try:
+			USER_DATA_DB = load_user_data()
+
+			USER_DATA_DB[str(user_id)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = send_message.message_id
+
+			save_user_data(USER_DATA_DB)
 		except Exception as e:
 			logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)

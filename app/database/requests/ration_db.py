@@ -22,7 +22,7 @@ def create_ration_file(file_name) -> None:
 
 	if not os.path.exists(file_path):
 		with open(file_path, "w") as file:
-			json.dump({}, file)
+			json.dump({"RATION_MAIN": {"RATION_SELECT": None}}, file)
 
 def is_ration_in_data(ration_id, ration_data) -> bool:
 	"""
@@ -33,6 +33,20 @@ def is_ration_in_data(ration_id, ration_data) -> bool:
 	:return: True, если ration_id присутствует в ration_data, в противном случае - False.
 	"""
 	return str(ration_id) in ration_data
+
+def is_weekday_in_data(weekday_key, ration_data) -> bool:
+    """
+    Проверяет, присутствует ли указанный день недели в ration_data.
+
+    :param weekday_key: Ключ дня недели для проверки (например, 'MONDAY').
+    :param ration_data: Данные, в которых производится поиск дня недели.
+    :return: True, если день недели присутствует в ration_data, в противном случае - False.
+    """
+    for ration_id, ration_details in ration_data.items():
+        if "WEEKDAY" in ration_details:
+            if weekday_key in ration_details["WEEKDAY"]:
+                return True
+    return False
 
 """Загрузка данных об рационе из JSON-файла"""
 def load_ration_data() -> dict:

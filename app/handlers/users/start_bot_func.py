@@ -198,7 +198,10 @@ async def nation_handler(message_or_callbackQuery: Union[types.Message, types.Ca
 			USER_DATA_DB[str(ConfigBot.USERID(message_or_callbackQuery))]["STATES_USER"] = {
 				"NUMBER_WALLET_ID": None,
 				"SPORT_ID": None,
-				"PREVIOUS_MESSAGE_ID": None
+				"PREVIOUS_MESSAGE_ID": None,
+				"UPDATE_ID": None,
+				"RATION_ID": None,
+				"WEEKDAY_ID": None
 			}
 
 			"""Сохраняем данные о уведомлениях."""

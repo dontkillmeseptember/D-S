@@ -228,7 +228,40 @@ def create_menu_ration_admin_inlinekeyboard() -> create_admin_inline_keyboard:
 			(ConfigInlineKeyboard().DELETE_RATION, "DELETE_RATION")
 		],
 		[(ConfigInlineKeyboard().EDIT_RATION, "EDIT_RATION")],
+		[(ConfigInlineKeyboard().SELECT_RATION, "SELECT_RATION")],
 		[(ConfigInlineKeyboard().BACK, "BACK_DEBUG_INLINE_KEYBOARD_THREE")]
 	]
 
 	return create_admin_inline_keyboard(menu_ration_admin_inline_keyboard, row_width = 2)
+
+"""Создаем Inline клавиатуру для возвращения в управление рационом."""
+def create_back_ration_inlinekeyboard() -> create_admin_inline_keyboard:
+	back_ration_inline_keyboard = [[(ConfigInlineKeyboard().BACK, "BACK_RATION")]]
+
+	return create_admin_inline_keyboard(back_ration_inline_keyboard)
+
+"""Создаем Inline клавиатуру для редактирования Рациона."""
+def create_menu_edit_ration_admin_inlinekeyboard() -> create_admin_inline_keyboard:
+	menu_edit_ration_admin_inline_keyboard = [
+		[
+			(ConfigInlineKeyboard().EDIT_NAME_RATION, "EDIT_NAME_RATION"),
+			(ConfigInlineKeyboard().EDIT_EMOJI_RATION, "EDIT_EMOJI_RATION")
+		],
+		[(ConfigInlineKeyboard().EDIT_WEEKDAY_RATION, "EDIT_WEEKDAY_RATION")],
+		[(ConfigInlineKeyboard().BACK, "EDIT_RATION")]
+	]
+
+	return create_admin_inline_keyboard(menu_edit_ration_admin_inline_keyboard, row_width = 2)
+
+"""Создаем Inline клавиатуру для редактирования дня недели."""
+def create_menu_edit_weekday_admin_inlinekeyboard() -> create_admin_inline_keyboard:
+	menu_edit_weekday_admin_inline_keyboard = [
+		[
+			(ConfigInlineKeyboard().EDIT_WEEKDAY_DESCRIPTION, "EDIT_WEEKDAY_DESCRIPTION"),
+			(ConfigInlineKeyboard().EDIT_WEEKDAY_DELETE_MEALS, "EDIT_WEEKDAY_DELETE_MEALS")
+		],
+		[(ConfigInlineKeyboard().EDIT_WEEKDAY_MEALS, "EDIT_WEEKDAY_MEALS")],
+		[(ConfigInlineKeyboard().BACK, "EDIT_WEEKDAY_RATION")]
+	]
+
+	return create_admin_inline_keyboard(menu_edit_weekday_admin_inline_keyboard, row_width = 2)

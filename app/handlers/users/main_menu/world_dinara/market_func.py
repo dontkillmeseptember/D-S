@@ -22,7 +22,7 @@ async def market_handler(message_or_callbackQuery: Union[types.Message, types.Ca
 	try:
 		"""Объявляем переменную с выводом информации о пользователе: USER_ID"""
 		USER_ID = ConfigBot.USERID(message_or_callbackQuery)
-		
+
 		if is_user_in_data(USER_ID, USER_DATA_DB):
 			"""Объявляем переменную с выводом текущей версии пользователя"""
 			USER_VERSION_BOT = ConfigBot.USERVERSIONBOT(message_or_callbackQuery)
@@ -33,19 +33,19 @@ async def market_handler(message_or_callbackQuery: Union[types.Message, types.Ca
 
 				if isinstance(message_or_callbackQuery, types.Message):
 					await message_or_callbackQuery.answer(f"💬 Добро пожаловать во вкладку <b>«{ConfigReplyKeyboard().MARKET[4:]}»</b>.\n\n"
-														   f" • На данный момент у вас <b>{ConfigBot.GETLENUSERS(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
-														   f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.", 
-														   reply_markup = market_menu_users_inline_keyboard)
+															f" • На данный момент у вас <b>{ConfigBot.GETLENUSERS(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
+															f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.", 
+															reply_markup = market_menu_users_inline_keyboard)
 					
 					await state.finish()
 
 				elif isinstance(message_or_callbackQuery, types.CallbackQuery):
 					await bot.edit_message_text( f"💬 Добро пожаловать во вкладку <b>«{ConfigReplyKeyboard().MARKET[4:]}»</b>.\n\n"
-										   		 f" • На данный момент у вас <b>{len(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
-										   		 f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.",
-												 message_or_callbackQuery.from_user.id,
-												 message_or_callbackQuery.message.message_id,
-										   		 reply_markup = market_menu_users_inline_keyboard)
+													f" • На данный момент у вас <b>{len(MARKET_DATA_DB)}</b> товаров в корзине.\n\n"
+													f"❕ Для просмотра полного <b>списка товаров</b> и <b>дополнительных деталей</b>, пожалуйста, нажмите на кнопку <b>«{ConfigInlineKeyboard().CHECK_MARKET[2:-2]}»</b>.",
+													message_or_callbackQuery.from_user.id,
+													message_or_callbackQuery.message.message_id,
+													reply_markup = market_menu_users_inline_keyboard)
 					
 					await state.finish()
 				else:
@@ -54,12 +54,12 @@ async def market_handler(message_or_callbackQuery: Union[types.Message, types.Ca
 			elif USER_VERSION_BOT != VERSION_BOT:
 				if isinstance(message_or_callbackQuery, types.Message):
 					await message_or_callbackQuery.answer(f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>! Рады сообщить, что вышла <b>новая версия</b> нашего бота с улучшениями и новыми возможностями.\n\n" 
-														   "❕ Для получения всех новинок и обновлений, пожалуйста, воспользуйтесь командой <b><code>/update</code></b>.\n\n" 
-														   "Спасибо за ваше внимание и активное использование нашего бота! 🤍")
+															"❕ Для получения всех новинок и обновлений, пожалуйста, воспользуйтесь командой <b><code>/update</code></b>.\n\n" 
+															"Спасибо за ваше внимание и активное использование нашего бота! 🤍")
 					
 				elif isinstance(message_or_callbackQuery, types.CallbackQuery):
 					await bot.send_message(message_or_callbackQuery.message.chat.id, 
-										   f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>! Рады сообщить, что вышла <b>новая версия</b> нашего бота с улучшениями и новыми возможностями.\n\n" 
+											f"💬 <a href='https://t.me/{ConfigBot.USERNAME(message_or_callbackQuery)}'>{ConfigBot.USERLASTNAME(message_or_callbackQuery)}</a>! Рады сообщить, что вышла <b>новая версия</b> нашего бота с улучшениями и новыми возможностями.\n\n" 
 											"❕ Для получения всех новинок и обновлений, пожалуйста, воспользуйтесь командой <b><code>/update</code></b>.\n\n" 
 											"Спасибо за ваше внимание и активное использование нашего бота! 🤍")
 				else:

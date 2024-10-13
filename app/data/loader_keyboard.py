@@ -19,7 +19,8 @@ from keyboards.users.InlineKeyboard.InlineKeyboard_all import (
 	create_back_market_users_inlinekeyboard,
 	create_back_market_check_users_inlinekeyboard,
 	create_sport_menu_inlinekeyboard,
-	create_change_sport_inlinekeyboard
+	create_change_sport_inlinekeyboard,
+	create_memory_diary_inlinekeyboard
 )
 
 from keyboards.admins.InlineKeyboard.InlineKeyboardAdmin_all import (
@@ -43,7 +44,10 @@ from keyboards.admins.InlineKeyboard.InlineKeyboardAdmin_all import (
 	create_back_sport_inlinekeyboard,
 	create_menu_edit_sport_admin_inlinekeyboard,
 	create_back_edit_sport_admin_inlinekeybard,
-	create_menu_ration_admin_inlinekeyboard
+	create_menu_ration_admin_inlinekeyboard,
+	create_back_ration_inlinekeyboard,
+	create_menu_edit_ration_admin_inlinekeyboard,
+	create_menu_edit_weekday_admin_inlinekeyboard
 )
 
 @dataclass
@@ -89,23 +93,33 @@ class LoaderInlineKeyboards:
 			inline_keyboards_shange_sport=None
 		):
 	
-		"""Выводим inline клавиатуру для восстановления пароля от учетной записи пользователя."""
 		self.INLINE_KEYBOARDS_RECOVERY = inline_keyboards_recovery or create_recovery_inlinekeyboard()
-		"""Выводим Inline клавиатуру для пропуска фазы нации для пользователя."""
+
 		self.INLINE_KEYBOARDS_SKIP_PHASE_NATION = inline_keyboards_skip_phase_nation or skip_phase_nation_inlinekeyboard()
-		"""Выводим inline клавиатуру для меню вкладки "Ваш Профиль" для пользователей."""
+
 		self.INLINE_KEYBOARDS_BACK_PROFILEMENU = inline_keyboards_back_profilemenu or create_back_profile_inlinekeyboard()
 		self.INLINE_KEYBOARDS_PROFILEMENU = inline_keyboards_profilemenu or create_profilemenu_inlinekeyboard(message)
 		self.INLINE_KEYBOARDS_NOTIFYMENU = inline_keyboards_notifymenu or create_notify_inlinekeyboard(message)
 		self.INLINE_KEYBOARDS_CHANGESPORT = inline_keyboards_shange_sport or create_change_sport_inlinekeyboard(message)
-		"""Выводим inline клавиатуру для меню вкладки "Корзина Товаров" для пользователей."""
+
 		self.INLINE_KEYBOARDS_MARKETMENU_USERS = inline_keyboards_marketmenu_users or create_marketmenu_users_inlinekeyboard()
-		"""Выводим inline клавиатуру для кнопки назад в фазе во вкладке "Корзина Товаров" для пользователей."""
+
 		self.INLINE_KEYBOARDS_BACK_MARKET = inline_keyboards_back_market or create_back_market_users_inlinekeyboard()
-		"""Выводим inlone клавиатуру для кнопки отменить поиск товаров во вкладке "Корзина товаров" для пользователей."""
+
 		self.INLINE_KEYBOARDS_BACK_MARKET_CHECK = inline_keyboards_back_market_check or create_back_market_check_users_inlinekeyboard()
-		"""Выводим inline клавиатуру для меню вкладки "Кодекс Силы" для пользователей."""
+
 		self.INLINE_KEYBOARDS_MENU_SPORT = inline_keyboards_menu_sport or create_sport_menu_inlinekeyboard()
+
+@dataclass
+class LoaderInlineKeyboardsMemoryDiary:
+	def __init__(
+			self,
+			year = None,
+			month = None,
+			inline_keyboards_memory_days = None
+		):
+
+		self.INLINE_KEYBOARDS_MEMORY_DAYS = inline_keyboards_memory_days or create_memory_diary_inlinekeyboard(year, month)
 
 @dataclass
 class LoaderInlineKeyboardsAdmin:
@@ -131,7 +145,10 @@ class LoaderInlineKeyboardsAdmin:
 			inline_keyboards_back_sport_menu=None,
 			inline_keyboards_edit_menu_sport=None,
 			inline_keyboards_back_edit_sport_menu=None,
-			inline_keyboards_ration_menu=None
+			inline_keyboards_ration_menu=None,
+			inline_keyboards_back_ration_menu=None,
+			inline_keyboards_edit_menu_ration=None,
+			inline_keyboards_edit_weekdays_menu_ration=None
 		):
 	
 		"""Выводим inline клавиатуру для меню вкладки "Панель Управления" для администрации."""
@@ -178,6 +195,9 @@ class LoaderInlineKeyboardsAdmin:
 
 		"""Выводим Inline клавиатуру для меню вкладки "Управления Рационом" для администрации."""
 		self.INLINE_KEYBOARDS_RATION_MENU = inline_keyboards_ration_menu or create_menu_ration_admin_inlinekeyboard()
+		self.INLINE_KEYBOARDS_BACK_RATION_MENU = inline_keyboards_back_ration_menu or create_back_ration_inlinekeyboard()
+		self.INLINE_KEYBOARDS_EDIT_RATION_MENU = inline_keyboards_edit_menu_ration or create_menu_edit_ration_admin_inlinekeyboard()
+		self.INLINE_KEYBOARDS_EDIT_WEEKDAYS_RATION_MENU = inline_keyboards_edit_weekdays_menu_ration or create_menu_edit_weekday_admin_inlinekeyboard()
 
 # @dataclass
 # class LoaderInlineKeyboardsAdmin:

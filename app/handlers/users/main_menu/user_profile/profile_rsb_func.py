@@ -85,13 +85,13 @@ async def send_password_rsb_bank_user_handler(message: types.Message, state: FSM
 
 			back_profile_inline_keyboard = LoaderInlineKeyboards(message).INLINE_KEYBOARDS_BACK_PROFILEMENU
 
-			# if isinstance(MESSAGE_ID, int):
-			# 	await bot.delete_message(message.chat.id, MESSAGE_ID)
+			if isinstance(MESSAGE_ID, int):
+				await bot.delete_message(message.chat.id, MESSAGE_ID)
 
-			# 	USER_DATA_DB[str(USER_ID)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = None
+				USER_DATA_DB[str(USER_ID)]["STATES_USER"]["PREVIOUS_MESSAGE_ID"] = None
 
-			# elif MESSAGE_ID is None:
-			# 	return MESSAGE_ID
+			elif MESSAGE_ID is None:
+				return MESSAGE_ID
 			
 			if is_rsb_in_data(USER_MESSAGE, RSB_DATA_DB):
 				"""Объявляем переменные с выводом информации о фотографии пользователя и выводим первую фотографию пользователя"""
