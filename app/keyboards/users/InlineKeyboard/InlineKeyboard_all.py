@@ -4,17 +4,30 @@ from data.config_Keyboard import ConfigInlineKeyboard
 from database.requests.admin_db import load_admin_data, is_admin_in_data
 from database.requests.sport_db import load_sport_data
 
-from misc.libraries import InlineKeyboardButton, InlineKeyboardMarkup
+from misc.libraries import InlineKeyboardButton, InlineKeyboardMarkup, calendar
 from misc.loggers import logger
 
 """Создаем общую функцию для уменьшения дублирования кода."""
 def create_user_inline_keyboard(button_data, row_width = 1) -> InlineKeyboardMarkup:
 	try:
-		buttons = [
-			[InlineKeyboardButton(button_text, callback_data = callback_data) for button_text, callback_data in row]
-			for row in button_data
-		]
-		return InlineKeyboardMarkup(row_width = row_width, inline_keyboard = buttons)
+		BUTTONS = []
+
+		for row in button_data:
+			BUTTON_ROW = []
+
+			for BUTTON_TEXT, DATA in row:
+				if isinstance(DATA, dict) and "url" in DATA:
+					BUTTON_ROW.append(InlineKeyboardButton(BUTTON_TEXT, url = DATA["url"]))
+				
+				elif isinstance(DATA, str):
+					BUTTON_ROW.append(InlineKeyboardButton(BUTTON_TEXT, callback_data = DATA))
+
+				else:
+					logger.error("⚠️ Произошла непредвиденная ошибка: %s", DATA)
+			
+			BUTTONS.append(BUTTON_ROW)
+		
+		return InlineKeyboardMarkup(row_width = row_width, inline_keyboard = BUTTONS)
 	except Exception as e:
 		logger.error("⚠️ Произошла непредвиденная ошибка: %s", e)
 
@@ -37,7 +50,7 @@ def create_profilemenu_inlinekeyboard(message) -> create_user_inline_keyboard:
 	USER_SPORT = ConfigBot.USERSELECTEDSPORT(message)
 
 	profile_menu_button_configs = {
-		(None, False): [
+		(False, False): [
 			[(ConfigInlineKeyboard().VERIFY_ACCOUNT, "VERIFY_ACCOUNT")],
 			[(ConfigInlineKeyboard().DELETE_ACCOUNT, "DELETE_ACCOUNT")]
 		],
@@ -63,6 +76,58 @@ def create_profilemenu_inlinekeyboard(message) -> create_user_inline_keyboard:
 	profile_menu_inline_keyboard = profile_menu_button_configs.get((USER_VERIFICATION, USER_SPORT), [])
 	
 	return create_user_inline_keyboard(profile_menu_inline_keyboard)
+
+def create_memory_diary_inlinekeyboard(year = None, month = None, day = 1) -> create_user_inline_keyboard:
+	BACK_MONTH = month - 1 if month > 1 else 12
+	BACK_YEAR = year - 1 if month == 1 else year
+	NEXT_MONTH = month + 1 if month < 12 else 1
+	NEXT_YEAR = year + 1 if month == 12 else year
+
+	USER_DAY = ConfigBot.GET_USER_DAY_YEAR_MONTH('day')
+	USER_YEAR = ConfigBot.GET_USER_DAY_YEAR_MONTH('year')
+	USER_MONTH = ConfigBot.GET_USER_DAY_YEAR_MONTH('month')
+
+	RUSSIAN_TRANSLATE_MONTHS = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ]
+
+	memory_diary_inline_keyboard = [
+		[
+			(ConfigInlineKeyboard().BACK_EMODJI, f"MONTH_BACK_{BACK_YEAR}_{BACK_MONTH}"),
+			(f"{year} • {RUSSIAN_TRANSLATE_MONTHS[month - 1]}", "#"),
+			(ConfigInlineKeyboard().NEXT_EMODJI, f"MONTH_NEXT_{NEXT_YEAR}_{NEXT_MONTH}")
+		]
+	]
+
+	DAYS_IN_MONTH = 31 if month in [1, 3, 5, 7, 8, 10, 12] else 30 if month != 2 else 29 if calendar.isleap(year) else 28
+
+	while day <= DAYS_IN_MONTH:
+		WEEK_BUTTONS = []
+
+		for _ in range(7):
+			if day > DAYS_IN_MONTH:
+				break
+
+			CALLBACK_DATA = f"{year}-{month:02d}-{day:02d}"
+			MESSAGE_MEMORY_DIARY = ConfigBot.GET_MEMORY_DIARY(CALLBACK_DATA)
+
+			if day == USER_DAY and month == USER_MONTH and year == USER_YEAR:
+				if MESSAGE_MEMORY_DIARY:
+					WEEK_BUTTONS.append((f"✉️", {"url": MESSAGE_MEMORY_DIARY}))
+				else:
+					WEEK_BUTTONS.append((f"• {str(day)} •", f"DATE_{CALLBACK_DATA}"))
+			else:
+				if MESSAGE_MEMORY_DIARY:
+					WEEK_BUTTONS.append((f"✉️", {"url": MESSAGE_MEMORY_DIARY}))
+				else:
+					WEEK_BUTTONS.append((f"{str(day)}", f"DATE_{CALLBACK_DATA}"))
+
+			day += 1
+		
+		memory_diary_inline_keyboard.append(WEEK_BUTTONS)
+
+	return create_user_inline_keyboard(memory_diary_inline_keyboard, row_width = 7)
 
 """Создаем Inline клавиатуру для вкладки "Уведомления" для пользователей."""
 def create_notify_inlinekeyboard(message) -> create_user_inline_keyboard:
